@@ -1,0 +1,18 @@
+services:
+  frontend:
+    image: frontend_image
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5053:5173"
+    container_name: frontend_container
+
+  backend:
+    image: backend_image
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5054:8080"
+    container_name: backend_container
