@@ -10,14 +10,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
 
 @Service
 public class ApiAuthImp implements ApiAuth{
     @Value("${amadeus.api.key}")
     private String apiKey;
 
-    @Value("{amadeus.api.secret}")
+    @Value("${amadeus.api.secret}")
     private String apiSecret;
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -35,7 +34,6 @@ public class ApiAuthImp implements ApiAuth{
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
         var response = restTemplate.postForEntity(url, request, TokenResponse.class);
-        System.out.println(response.getBody());
         return response.getBody().getAccess_token();
     }
 }
