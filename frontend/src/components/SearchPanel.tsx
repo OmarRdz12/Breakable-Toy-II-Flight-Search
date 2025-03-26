@@ -9,6 +9,7 @@ import InputDebounceSelect from "./inputs/InputDebounceSelect"
 import { BasicSelect } from "../interfaces/types"
 
 const SearchPanel = () => {
+    const url = import.meta.env.VITE_API_URL
     const [value, setValue] = useState('')
     const [date, setDate] = useState<string | number | Dayjs | Date | null | undefined>(null)
     const [checked, setChecked] = useState(false)
@@ -16,7 +17,7 @@ const SearchPanel = () => {
     const [arrival, setArrival] = useState<BasicSelect[]>([])
 
     async function fetchAirportList(city: string): Promise<BasicSelect[]> {
-      return fetch(`http://localhost:8080/locations?name=${city}`)
+      return fetch(`${url}locations?name=${city}`)
         .then((response) => response.json())
         .then((data) =>
           data.map(
