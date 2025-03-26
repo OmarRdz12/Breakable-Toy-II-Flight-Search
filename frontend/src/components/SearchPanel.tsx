@@ -5,15 +5,31 @@ import { CheckboxProps, DatePickerProps } from "antd"
 import dayjs, { Dayjs } from 'dayjs'
 import BaseButton from "./Button"
 import InputCheckbox from "./inputs/InputCheckbox"
+import InputDebounceSelect from "./inputs/InputDebounceSelect"
+import { BasicSelect } from "../interfaces/types"
 
 const SearchPanel = () => {
     const [value, setValue] = useState('')
     const [date, setDate] = useState<string | number | Dayjs | Date | null | undefined>(null)
     const [checked, setChecked] = useState(false)
+    const [departure, setDeparture] = useState<BasicSelect[]>([])
+    const [arrival, setArrival] = useState<BasicSelect[]>([])
+
+    async function fetchAirportList(city: string): Promise<BasicSelect[]> {
+      return fetch(`http://localhost:8080/locations?name=${city}`)
+        .then((response) => response.json())
+        .then((data) =>
+          data.map(
+            (airport: { city: string; code: string; country: string }) => ({
+              label: `${airport.city} (${airport.code})`,
+              value: airport.code,
+            }),
+          ),
+        );
+    }
 
     const handleChange = (value: string) => {
         setValue(value)
-
     }
 
     const onChange: DatePickerProps['onChange'] = (date) => {
@@ -29,25 +45,19 @@ const SearchPanel = () => {
         <div className="w-2/4 h-3/4 shadow flex flex-col items-center justify-center">
             <h1 className="text-5xl"> File Search</h1>
             <form className="w-10/12 flex justify-center flex-col">
-                <InputSelect
-                    name="dep-air"
-                    label="Departure airport"
-                    id="dep-air"
-                    options={[{ label: "CDMX", value: 'CDMX' }, { label: "LA", value: 'LA' }]}
-                    onChange={(value) => handleChange(value)}
-                    value={value}
-                    className="w-1/2"
-                    size="large"
+                <InputDebounceSelect 
+                    label="Departure airport" 
+                    id="dep-ir"
+                    fetchData={fetchAirportList}
+                    value={departure}
+                    setValue={setDeparture}
                 />
-                <InputSelect
-                    name="arr-air"
-                    label="Arrival airport"
-                    id="ar-air"
-                    options={[{ label: "CDMX", value: 'CDMX' }, { label: "LA", value: 'LA' }]}
-                    onChange={(value) => handleChange(value)}
-                    value={value}
-                    className="w-1/2"
-                    size="large"
+                <InputDebounceSelect 
+                    label="Arrival airport" 
+                    id="arr-ir"
+                    fetchData={fetchAirportList}
+                    value={arrival}
+                    setValue={setArrival}
                 />
                 <InputDate
                     name="dep-date"
