@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import encora.breakableII.backend.dao.FlightSearchDao;
 import encora.breakableII.backend.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,9 @@ public class FlightServiceImpl implements FlightService{
     private final RestTemplate restTemplate = new RestTemplate();
     FlightSearchDao flightSearchDao;
 
+    @Value("${amadeus.api.flights}")
+    private String urlBase;
+
     public FlightServiceImpl(FlightSearchDao flightSearchDao) {
         this.flightSearchDao = flightSearchDao;
     }
@@ -32,7 +36,7 @@ public class FlightServiceImpl implements FlightService{
         String urlBase = "https://test.api.amadeus.com/v2/shopping/flight-offers?";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
-        String url = urlBase + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop;
+        String url = urlBase  + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop;
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
         var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
