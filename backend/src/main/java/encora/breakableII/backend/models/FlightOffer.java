@@ -6,13 +6,49 @@ import java.util.List;
 public class FlightOffer {
     private LocalDateTime departureDate;
     private LocalDateTime arrivalDateTime;
+    private String departureAirport;
+    private String arrivalAirport;
     private String airlineName;
     private String airlineCode;
     private String carrierName;
     private String carrierCode;
-    private int duration;
-    private float price;
+    private String duration;
+    private String pricePerTraveler;
+    private String priceTotal;
+
+    public String getPricePerTraveler() {
+        return pricePerTraveler;
+    }
+
+    public void setPricePerTraveler(String pricePerTraveler) {
+        this.pricePerTraveler = pricePerTraveler;
+    }
+
+    public String getPriceTotal() {
+        return priceTotal;
+    }
+
+    public void setPriceTotal(String priceTotal) {
+        this.priceTotal = priceTotal;
+    }
+
     private List<Stops> stops;
+
+    public String getDepartureAirport() {
+        return departureAirport;
+    }
+
+    public void setDepartureAirport(String departureAirport) {
+        this.departureAirport = departureAirport;
+    }
+
+    public String getArrivalAirport() {
+        return arrivalAirport;
+    }
+
+    public void setArrivalAirport(String arrivalAirport) {
+        this.arrivalAirport = arrivalAirport;
+    }
 
     public LocalDateTime getDepartureDate() {
         return departureDate;
@@ -62,20 +98,12 @@ public class FlightOffer {
         this.carrierCode = carrierCode;
     }
 
-    public int getDuration() {
+    public String getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(String duration) {
         this.duration = duration;
-    }
-
-    public float getPrice() {
-        return price;
-    }
-
-    public void setPrice(float price) {
-        this.price = price;
     }
 
     public List<Stops> getStops() {
