@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import encora.breakableII.backend.dao.FlightSearchDao;
 import encora.breakableII.backend.models.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,11 +18,8 @@ import java.util.List;
 @Service
 public class FlightServiceImpl implements FlightService{
 
-    @Autowired
-    private ApiAuthImp apiAuthImp;
-
-    private final RestTemplate restTemplate = new RestTemplate();
-    FlightSearchDao flightSearchDao;
+    private final ApiAuth apiAuth;
+    private final FlightSearchDao flightSearchDao;
 
     @Value("${amadeus.api.flights}")
     private String urlBase;
@@ -31,13 +27,15 @@ public class FlightServiceImpl implements FlightService{
     @Value("${amadeus.api.airport}")
     private String urlBaseAirport;
 
-    public FlightServiceImpl(FlightSearchDao flightSearchDao) {
+    public FlightServiceImpl(ApiAuth apiAuth, FlightSearchDao flightSearchDao ) {
+        this.apiAuth = apiAuth;
         this.flightSearchDao = flightSearchDao;
     }
 
     @Override
     public List<FlightOffer> searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop) {
-        String token = apiAuthImp.getAccessToken();
+        RestTemplate restTemplate = new RestTemplate();
+        String token = apiAuth.getAccessToken();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         String url = urlBase  + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop;
@@ -83,7 +81,8 @@ public class FlightServiceImpl implements FlightService{
 
     @Override
     public List<Airport> getLocations(String name) {
-        String token = apiAuthImp.getAccessToken();
+        String token = apiAuth.getAccessToken();
+        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         String url = urlBaseAirport + "keyword=" + name;

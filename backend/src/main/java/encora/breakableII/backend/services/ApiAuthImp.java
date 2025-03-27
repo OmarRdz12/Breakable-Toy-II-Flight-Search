@@ -26,7 +26,6 @@ public class ApiAuthImp implements ApiAuth{
 
     @Override
     public String getAccessToken() {
-        //String url = "https://test.api.amadeus.com/v1/security/oauth2/token";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
