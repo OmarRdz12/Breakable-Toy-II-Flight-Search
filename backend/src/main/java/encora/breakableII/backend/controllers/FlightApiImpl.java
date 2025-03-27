@@ -1,6 +1,7 @@
 package encora.breakableII.backend.controllers;
 
 import encora.breakableII.backend.models.Airport;
+import encora.breakableII.backend.models.FlightOffer;
 import encora.breakableII.backend.services.FlightService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class FlightApiImpl implements FlightApi{
     }
 
     @Override
-    public ResponseEntity<String> getFlights(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop) {
+    public ResponseEntity<List<FlightOffer>> getFlights(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop) {
         return new ResponseEntity<>(flightService.searchLocations(originLocationCode, destinationCode, departureDate, adults, nonStop), HttpStatus.OK);
     }
 }

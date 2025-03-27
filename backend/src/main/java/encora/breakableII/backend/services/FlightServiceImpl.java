@@ -12,6 +12,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,14 +28,16 @@ public class FlightServiceImpl implements FlightService{
     @Value("${amadeus.api.flights}")
     private String urlBase;
 
+    @Value("${amadeus.api.airport}")
+    private String urlBaseAirport;
+
     public FlightServiceImpl(FlightSearchDao flightSearchDao) {
         this.flightSearchDao = flightSearchDao;
     }
 
     @Override
-    public String searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop) {
+    public List<FlightOffer> searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop) {
         String token = apiAuthImp.getAccessToken();
-        String urlBase = "https://test.api.amadeus.com/v2/shopping/flight-offers?";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         String url = urlBase  + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop;
@@ -41,42 +45,71 @@ public class FlightServiceImpl implements FlightService{
         HttpEntity<String> entity = new HttpEntity<>(headers);
         var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
         ObjectMapper mapper = new ObjectMapper();
+        List<FlightOffer> frontendResponse = new ArrayList<FlightOffer>();
         try {
             FlightResponse res = mapper.readValue(response.getBody(), FlightResponse.class);
             if (res.getMeta().getCount() == 0)
-                return "No hay vuelos disponibles";
+                return frontendResponse;
             List<FlightAmadeus> flightOffers = res.getData();
-            for (FlightAmadeus offer : flightOffers) {
-                List<Itinerary> itineraries = offer.getItineraries();
-                System.out.println("Duracion : " + itineraries.getFirst().getDuration());
-                List<Segment> segments = itineraries.getFirst().getSegments();
-                System.out.println("Hora de Salida: " +  segments.getFirst().getDeparture().getAt());
-                System.out.println("Lugar de Salida: " +  segments.getFirst().getDeparture().getIataCode());
-                System.out.println("Hora de llegada:" +segments.getLast().getArrival().getAt());
-                System.out.println("Lugar de llegada:" +segments.getLast().getArrival().getIataCode());
 
-                System.out.println("Precio por viajero: " + offer.getTravelerPricings().getFirst().getPrice().getTotal() );
-                System.out.println("Precio total: " + offer.getPrice().getTotal());
+            for (FlightAmadeus offer : flightOffers) {
+                FlightOffer flightOffer = new FlightOffer();
+                List<Itinerary> itineraries = offer.getItineraries();
+                List<Segment> segments = itineraries.getFirst().getSegments();
+                flightOffer.setDepartureDate(LocalDateTime.parse(segments.getFirst().getDeparture().getAt()));
+                flightOffer.setArrivalDateTime(LocalDateTime.parse(segments.getLast().getArrival().getAt()));
+                flightOffer.setDepartureAirport(segments.getFirst().getDeparture().getIataCode());
+                flightOffer.setArrivalAirport(segments.getLast().getArrival().getIataCode());
+                flightOffer.setPricePerTraveler(offer.getTravelerPricings().getFirst().getPrice().getTotal());
+                flightOffer.setPriceTotal(offer.getPrice().getTotal());
+
                 for(String codes : offer.getValidatingAirlineCodes())
                 {
-                    System.out.println("Aerolinea: " + codes);
+                    flightOffer.setAirlineCode(codes);
                 }
                 for (Segment segment : segments)
                 {
-                    System.out.println("Parada en " + segment.getArrival().getIataCode() + "a las " + segment.getArrival().getAt());
-                    System.out.println("Operating: " + segment.getCarrierCode() );
+                    //System.out.println("Operating: " + segment.getCarrierCode() );
+                    flightOffer.setCarrierCode(segment.getCarrierCode());
                 }
-
+                frontendResponse.add(flightOffer);
             }
-            return "funciona";
+            return frontendResponse;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return response.getBody();
+        return frontendResponse;
     }
 
     @Override
     public List<Airport> getLocations(String name) {
+        String token = apiAuthImp.getAccessToken();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+        String url = urlBaseAirport + "keyword=" + name;
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        if(response.getStatusCodeValue() != 200) {
+            return flightSearchDao.getLocation(name);
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            AirportResponse res = mapper.readValue(response.getBody(), AirportResponse.class);
+            if(res.getMeta().getCount() == 0)
+                return flightSearchDao.getLocation(name);
+            List<AirportAmadeus> airportsAmadeus = res.getData();
+            List<Airport> airports = new ArrayList<Airport>();
+            for (AirportAmadeus airportAmadeus : airportsAmadeus) {
+                Airport airport = new Airport();
+                airport.setCode(airportAmadeus.getIataCode());
+                airport.setCity(airportAmadeus.getName());
+                airports.add(airport);
+            }
+            return airports;
+
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         return flightSearchDao.getLocation(name);
     }
 }

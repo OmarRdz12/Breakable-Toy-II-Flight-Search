@@ -11,6 +11,9 @@ public class Airport {
         this.city = city;
     }
 
+    public Airport() {
+    }
+
     public String getCity() {
         return city;
     }
