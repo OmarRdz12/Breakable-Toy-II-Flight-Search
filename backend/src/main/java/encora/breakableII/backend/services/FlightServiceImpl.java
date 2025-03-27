@@ -33,7 +33,6 @@ public class FlightServiceImpl implements FlightService{
     @Override
     public String searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop) {
         String token = apiAuthImp.getAccessToken();
-        String urlBase = "https://test.api.amadeus.com/v2/shopping/flight-offers?";
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         String url = urlBase  + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop;
