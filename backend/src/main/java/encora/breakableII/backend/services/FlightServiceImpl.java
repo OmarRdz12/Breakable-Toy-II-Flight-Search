@@ -81,6 +81,10 @@ public class FlightServiceImpl implements FlightService{
 
     @Override
     public List<Airport> getLocations(String name) {
+        if(name.isEmpty()) {
+            List<Airport> emptyList = new ArrayList<Airport>();
+            return emptyList;
+        }
         String token = apiAuth.getAccessToken();
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
