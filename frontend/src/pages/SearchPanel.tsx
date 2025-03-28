@@ -1,14 +1,15 @@
 import { useContext, useState } from "react"
-import InputSelect from "./inputs/InputSelect"
-import InputDate from "./inputs/InputDate"
+import InputSelect from "../components/inputs/InputSelect"
+import InputDate from "../components/inputs/InputDate"
 import { CheckboxProps, DatePickerProps } from "antd"
 import dayjs, { Dayjs } from 'dayjs'
-import BaseButton from "./Button"
-import InputCheckbox from "./inputs/InputCheckbox"
-import InputDebounceSelect from "./inputs/InputDebounceSelect"
+import BaseButton from "../components/Button"
+import InputCheckbox from "../components/inputs/InputCheckbox"
+import InputDebounceSelect from "../components/inputs/InputDebounceSelect"
 import { BasicSelect, SearchForm } from "../interfaces/types"
 import { GlobalContext } from "../context/GlobalContext"
-import InputText from "./inputs/InputText"
+import InputText from "../components/inputs/InputText"
+import axios from "axios"
 
 const SearchPanel = () => {
     const url = import.meta.env.VITE_API_URL
@@ -27,6 +28,12 @@ const SearchPanel = () => {
                     }),
                 ),
             );
+    }
+
+    const onSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        const data = await axios.get(`${url}flights?originLocationCode=${searchForm.originLocationCode}&destinationLocationCode=${searchForm.destinationCode}&departureDate=${searchForm.departureDate}${searchForm.arrivalDate === "" ? "" : `&arrivalDate=${searchForm.arrivalDate}`}&adults=${searchForm.adults}&currencyCode=${searchForm.currency}&nonStop=${searchForm.nonStop}`)
+        console.log(data)
     }
 
     const onChangeDeparture: DatePickerProps['onChange'] = (date) => {
@@ -51,8 +58,8 @@ const SearchPanel = () => {
 
     return (
         <div className="w-2/4 h-3/4 shadow flex flex-col items-center justify-center">
-            <h1 className="text-5xl"> File Search</h1>
-            <form className="w-10/12 flex justify-center flex-col">
+            <h1 className="text-5xl">Flight Search</h1>
+            <form className="w-10/12 flex justify-center flex-col" onSubmit={onSubmit}>
                 <InputDebounceSelect
                     label="Departure airport"
                     id="originLocationCode"
