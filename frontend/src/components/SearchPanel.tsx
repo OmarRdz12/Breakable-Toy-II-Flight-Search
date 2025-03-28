@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useState } from "react"
 import InputSelect from "./inputs/InputSelect"
 import InputDate from "./inputs/InputDate"
 import { CheckboxProps, DatePickerProps } from "antd"
@@ -8,14 +8,11 @@ import InputCheckbox from "./inputs/InputCheckbox"
 import InputDebounceSelect from "./inputs/InputDebounceSelect"
 import { BasicSelect, SearchForm } from "../interfaces/types"
 import { GlobalContext } from "../context/GlobalContext"
+import InputText from "./inputs/InputText"
 
 const SearchPanel = () => {
     const url = import.meta.env.VITE_API_URL
     const { searchForm, setSearchForm } = useContext(GlobalContext)
-
-    const [value, setValue] = useState('')
-    const [date, setDate] = useState<string | number | Dayjs | Date | null | undefined>(null)
-    const [checked, setChecked] = useState(false)
     const [departure, setDeparture] = useState<BasicSelect[]>([])
     const [arrival, setArrival] = useState<BasicSelect[]>([])
 
@@ -32,25 +29,25 @@ const SearchPanel = () => {
             );
     }
 
-    const handleChange = (name: string, value: string) => {
-        //setSearchForm()
-        setValue(value)
+    const onChangeDeparture: DatePickerProps['onChange'] = (date) => {
+        setSearchForm((prev: SearchForm) => ({ ...prev, ["departureDate"]: date ? date.format("YYYY-MM-DD") : "" }))
     }
 
-    const onChange: DatePickerProps['onChange'] = (date) => {
-        setDate(date.format("YYYY-MM-DD"))
+    const onChangeArrival: DatePickerProps['onChange'] = (date) => {
+        setSearchForm((prev: SearchForm) => ({ ...prev, ["arrivalDate"]: date ?  date.format("YYYY-MM-DD") : "" }))
     }
 
     const onChangeBox: CheckboxProps['onChange'] = (e) => {
-        console.log('checked = ', e.target.checked);
-        setChecked(e.target.checked);
+        setSearchForm((prev: SearchForm) => ({ ...prev, ["nonStop"]: e.target.checked }))
+    }
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onChangeForm(e.target.value, e.target.name)
     }
 
     const onChangeForm = (value: string, name: string) => {
-        setSearchForm((prev: SearchForm) => ({...prev, [name]: value}))
-        console.log(name, value)
+        setSearchForm((prev: SearchForm) => ({ ...prev, [name]: value }))
     }
-
 
     return (
         <div className="w-2/4 h-3/4 shadow flex flex-col items-center justify-center">
@@ -76,8 +73,9 @@ const SearchPanel = () => {
                     name="dep-date"
                     label="Departure Date"
                     id="dep-date"
-                    onChange={onChange}
-                    value={date ? dayjs(date) : null}
+                    onChange={onChangeDeparture}
+                    value={searchForm.departureDate ? dayjs(searchForm.departureDate) : null}
+                    maxDate={searchForm.arrivalDate === "" ? null : searchForm.arrivalDate}
                     size="large"
                     className="w-1/2"
                 />
@@ -85,23 +83,37 @@ const SearchPanel = () => {
                     name="ret-date"
                     label="Return Date"
                     id="ret-date"
-                    onChange={onChange}
-                    value={date ? dayjs(date) : null}
+                    onChange={onChangeArrival}
+                    value={searchForm.arrivalDate ? dayjs(searchForm.arrivalDate) : null}
                     size="large"
                     className="w-1/2"
+                    minDate={searchForm.departureDate === "" ? null : searchForm.departureDate}
                 />
                 <InputSelect
                     name="currency"
                     label="Currency"
                     id="currency"
-                    options={[{ label: "USD", value: 'USD' }, { label: "MX", value: 'MX' }]}
-                    onChange={(value) => handleChange("currency", value)}
-                    value={value}
+                    options={[
+                        { label: "USD", value: 'USD' },
+                        { label: "MXN", value: 'MXN' },
+                        { label: "EUR", value: 'EUR' },
+                    ]}
+                    onChange={(value) => onChangeForm(value, "currency")}
+                    value={searchForm.currency}
                     className="w-1/2"
                     size="large"
                 />
+                <InputText
+                    name="adults"
+                    id="adults"
+                    type="number"
+                    required
+                    onChange={handleInputChange}
+                    label="Number of adults"
+                    size="large"
+                />
                 <InputCheckbox
-                    originChecked={checked}
+                    originChecked={searchForm.nonStop}
                     onChange={onChangeBox}
                     label="Non-stop"
                 />
