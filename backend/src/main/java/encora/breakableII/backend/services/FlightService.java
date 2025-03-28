@@ -6,6 +6,6 @@ import encora.breakableII.backend.models.FlightOffer;
 import java.util.List;
 
 public interface FlightService {
-    List<FlightOffer> searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop);
+    List<FlightOffer> searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate);
     List<Airport> getLocations(String name);
 }

@@ -16,7 +16,9 @@ public interface FlightApi {
                                                  @RequestParam(name = "destinationLocationCode", required = true) String destinationCode,
                                                  @RequestParam(name = "departureDate", required = true) String departureDate,
                                                  @RequestParam(name = "adults", required = true) int adults,
-                                                 @RequestParam(name = "nonStop", required = true) boolean nonStop
+                                                 @RequestParam(name = "nonStop", required = true) boolean nonStop,
+                                                 @RequestParam(name = "currencyCode", required = true) String currencyCode,
+                                                 @RequestParam(name = "arrivalDate", required = false, defaultValue = "") String arrivalDate
 
     );
 
