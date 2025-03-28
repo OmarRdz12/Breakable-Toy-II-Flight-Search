@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import InputSelect from "./inputs/InputSelect"
 import InputDate from "./inputs/InputDate"
 import { CheckboxProps, DatePickerProps } from "antd"
@@ -6,10 +6,13 @@ import dayjs, { Dayjs } from 'dayjs'
 import BaseButton from "./Button"
 import InputCheckbox from "./inputs/InputCheckbox"
 import InputDebounceSelect from "./inputs/InputDebounceSelect"
-import { BasicSelect } from "../interfaces/types"
+import { BasicSelect, SearchForm } from "../interfaces/types"
+import { GlobalContext } from "../context/GlobalContext"
 
 const SearchPanel = () => {
     const url = import.meta.env.VITE_API_URL
+    const { searchForm, setSearchForm } = useContext(GlobalContext)
+
     const [value, setValue] = useState('')
     const [date, setDate] = useState<string | number | Dayjs | Date | null | undefined>(null)
     const [checked, setChecked] = useState(false)
@@ -17,19 +20,20 @@ const SearchPanel = () => {
     const [arrival, setArrival] = useState<BasicSelect[]>([])
 
     async function fetchAirportList(city: string): Promise<BasicSelect[]> {
-      return fetch(`${url}locations?name=${city}`)
-        .then((response) => response.json())
-        .then((data) =>
-          data.map(
-            (airport: { city: string; code: string; country: string }) => ({
-              label: `${airport.city} (${airport.code})`,
-              value: airport.code,
-            }),
-          ),
-        );
+        return fetch(`${url}locations?name=${city}`)
+            .then((response) => response.json())
+            .then((data) =>
+                data.map(
+                    (airport: { city: string; code: string; country: string }) => ({
+                        label: `${airport.city} (${airport.code})`,
+                        value: airport.code,
+                    }),
+                ),
+            );
     }
 
-    const handleChange = (value: string) => {
+    const handleChange = (name: string, value: string) => {
+        //setSearchForm()
         setValue(value)
     }
 
@@ -40,25 +44,33 @@ const SearchPanel = () => {
     const onChangeBox: CheckboxProps['onChange'] = (e) => {
         console.log('checked = ', e.target.checked);
         setChecked(e.target.checked);
-    };
+    }
+
+    const onChangeForm = (value: string, name: string) => {
+        setSearchForm((prev: SearchForm) => ({...prev, [name]: value}))
+        console.log(name, value)
+    }
+
 
     return (
         <div className="w-2/4 h-3/4 shadow flex flex-col items-center justify-center">
             <h1 className="text-5xl"> File Search</h1>
             <form className="w-10/12 flex justify-center flex-col">
-                <InputDebounceSelect 
-                    label="Departure airport" 
-                    id="dep-ir"
+                <InputDebounceSelect
+                    label="Departure airport"
+                    id="originLocationCode"
                     fetchData={fetchAirportList}
                     value={departure}
                     setValue={setDeparture}
+                    setValueForm={onChangeForm}
                 />
-                <InputDebounceSelect 
-                    label="Arrival airport" 
-                    id="arr-ir"
+                <InputDebounceSelect
+                    label="Arrival airport"
+                    id="destinationCode"
                     fetchData={fetchAirportList}
                     value={arrival}
                     setValue={setArrival}
+                    setValueForm={onChangeForm}
                 />
                 <InputDate
                     name="dep-date"
@@ -83,7 +95,7 @@ const SearchPanel = () => {
                     label="Currency"
                     id="currency"
                     options={[{ label: "USD", value: 'USD' }, { label: "MX", value: 'MX' }]}
-                    onChange={(value) => handleChange(value)}
+                    onChange={(value) => handleChange("currency", value)}
                     value={value}
                     className="w-1/2"
                     size="large"
