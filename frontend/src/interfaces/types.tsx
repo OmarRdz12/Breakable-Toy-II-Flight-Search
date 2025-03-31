@@ -31,7 +31,38 @@ export interface TextInputProps {
     variant?: "outlined" | "borderless" | "filled" | undefined
 }
 
+export interface Amenities {
+    description: string
+    isChargeable: boolean
+}
+
+export interface FareDetailsBySegment {
+    segmentId: number
+    cabin: string
+    flightClass: string
+    amenities: any
+}
+
+export interface Stops {
+    departureAirportName: string
+    departureAirportCode: string
+    arrivalAirportName: string
+    arrivalAirportCode: string
+    departureTime: string
+    arrivalTime: string
+    durationTravel: string
+    airlineCode: string
+    airlineName: string
+    flightNumber: string
+    carrierAirlineCode: string
+    carrierAirlineName: string
+    aircraft: string
+    id: string
+    fareDetailsBySegment: FareDetailsBySegment
+}
+
 export interface FlightRespose {
+    id: string
     airlineCode: string
     airlineName: string
     arrivalAirport: string
@@ -45,5 +76,6 @@ export interface FlightRespose {
     duration: string
     pricePerTraveler: string
     priceTotal: string
-    stops: any
+    stops: Stops[]
+    currency: string
 }

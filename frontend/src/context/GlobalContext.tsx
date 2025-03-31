@@ -14,10 +14,6 @@ const GlobalContextProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const [searchForm, setSearchForm] = useState<SearchForm>({ originLocationCode: "", destinationCode: "", departureDate: "", arrivalDate: "", currency: "", adults: 1, nonStop: false })
     const [flights, setFlights] = useState<FlightRespose[]>([])
 
-    useEffect(() => {
-        console.log(flights)
-    }, [flights])
-
     return (
         <GlobalContext.Provider value={{
             searchForm,

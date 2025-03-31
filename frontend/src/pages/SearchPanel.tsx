@@ -40,6 +40,7 @@ const SearchPanel = () => {
         e.preventDefault()
         const data = await axios.get(`${url}flights?originLocationCode=${searchForm.originLocationCode}&destinationLocationCode=${searchForm.destinationCode}&departureDate=${searchForm.departureDate}${searchForm.arrivalDate === "" ? "" : `&arrivalDate=${searchForm.arrivalDate}`}&adults=${searchForm.adults}&currencyCode=${searchForm.currency}&nonStop=${searchForm.nonStop}`)
         const flightResponses: FlightRespose[] = data.data
+        console.log(data.data)
         setFlights(flightResponses)
         navigate('/flights')
     }
