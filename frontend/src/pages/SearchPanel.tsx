@@ -6,14 +6,20 @@ import dayjs, { Dayjs } from 'dayjs'
 import BaseButton from "../components/Button"
 import InputCheckbox from "../components/inputs/InputCheckbox"
 import InputDebounceSelect from "../components/inputs/InputDebounceSelect"
-import { BasicSelect, SearchForm } from "../interfaces/types"
+import { BasicSelect, FlightRespose, SearchForm } from "../interfaces/types"
 import { GlobalContext } from "../context/GlobalContext"
 import InputText from "../components/inputs/InputText"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 const SearchPanel = () => {
     const url = import.meta.env.VITE_API_URL
-    const { searchForm, setSearchForm } = useContext(GlobalContext)
+    const context = useContext(GlobalContext)
+    const navigate = useNavigate()
+    if (!context) {
+        throw new Error('Must be inside a context')
+    }
+    const { searchForm, setSearchForm, setFlights } = context
     const [departure, setDeparture] = useState<BasicSelect[]>([])
     const [arrival, setArrival] = useState<BasicSelect[]>([])
 
@@ -33,7 +39,9 @@ const SearchPanel = () => {
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         const data = await axios.get(`${url}flights?originLocationCode=${searchForm.originLocationCode}&destinationLocationCode=${searchForm.destinationCode}&departureDate=${searchForm.departureDate}${searchForm.arrivalDate === "" ? "" : `&arrivalDate=${searchForm.arrivalDate}`}&adults=${searchForm.adults}&currencyCode=${searchForm.currency}&nonStop=${searchForm.nonStop}`)
-        console.log(data)
+        const flightResponses: FlightRespose[] = data.data
+        setFlights(flightResponses)
+        navigate('/flights')
     }
 
     const onChangeDeparture: DatePickerProps['onChange'] = (date) => {
@@ -82,7 +90,7 @@ const SearchPanel = () => {
                     id="dep-date"
                     onChange={onChangeDeparture}
                     value={searchForm.departureDate ? dayjs(searchForm.departureDate) : null}
-                    maxDate={searchForm.arrivalDate === "" ? null : searchForm.arrivalDate}
+                    maxDate={searchForm.arrivalDate === "" ? undefined : searchForm.arrivalDate}
                     size="large"
                     className="w-1/2"
                 />
@@ -94,7 +102,7 @@ const SearchPanel = () => {
                     value={searchForm.arrivalDate ? dayjs(searchForm.arrivalDate) : null}
                     size="large"
                     className="w-1/2"
-                    minDate={searchForm.departureDate === "" ? null : searchForm.departureDate}
+                    minDate={searchForm.departureDate === "" ? undefined : searchForm.departureDate}
                 />
                 <InputSelect
                     name="currency"

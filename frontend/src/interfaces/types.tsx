@@ -20,7 +20,7 @@ export interface TextInputProps {
     id: string
     value?: string
     className?: string
-    onChange?: (e: React.ChangeEvent<HTMLInputElement> ) => void 
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
     size?: SizeType
     prefix?: React.ReactNode
     type: string
@@ -29,4 +29,21 @@ export interface TextInputProps {
     maxLength?: number
     showCount?: boolean
     variant?: "outlined" | "borderless" | "filled" | undefined
+}
+
+export interface FlightRespose {
+    airlineCode: string
+    airlineName: string
+    arrivalAirport: string
+    arrivalAirportName: string
+    arrivalDateTime: string
+    carrierCode: string
+    carrierName: string 
+    departureAirport: string
+    departureAirportName: string
+    departureDate: string
+    duration: string
+    pricePerTraveler: string
+    priceTotal: string
+    stops: any
 }
