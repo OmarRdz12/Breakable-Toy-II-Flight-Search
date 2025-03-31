@@ -7,7 +7,9 @@ public class FlightOffer {
     private LocalDateTime departureDate;
     private LocalDateTime arrivalDateTime;
     private String departureAirport;
+    private String departureAirportName;
     private String arrivalAirport;
+    private String arrivalAirportName;
     private String airlineName;
     private String airlineCode;
     private String carrierName;
@@ -15,6 +17,22 @@ public class FlightOffer {
     private String duration;
     private String pricePerTraveler;
     private String priceTotal;
+
+    public String getDepartureAirportName() {
+        return departureAirportName;
+    }
+
+    public void setDepartureAirportName(String departureAirportName) {
+        this.departureAirportName = departureAirportName;
+    }
+
+    public String getArrivalAirportName() {
+        return arrivalAirportName;
+    }
+
+    public void setArrivalAirportName(String arrivalAirportName) {
+        this.arrivalAirportName = arrivalAirportName;
+    }
 
     public String getPricePerTraveler() {
         return pricePerTraveler;

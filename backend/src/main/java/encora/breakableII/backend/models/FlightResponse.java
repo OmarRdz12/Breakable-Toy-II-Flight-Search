@@ -8,6 +8,15 @@ import java.util.List;
 public class FlightResponse {
     private Meta meta;
     private List<FlightAmadeus> data;
+    private Dictionaries dictionaries;
+
+    public Dictionaries getDictionaries() {
+        return dictionaries;
+    }
+
+    public void setDictionaries(Dictionaries dictionaries) {
+        this.dictionaries = dictionaries;
+    }
 
     public Meta getMeta() {
         return meta;
