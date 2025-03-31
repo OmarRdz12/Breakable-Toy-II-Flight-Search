@@ -37,7 +37,6 @@ public class FlightServiceImpl implements FlightService{
         this.flightSearchDao = flightSearchDao;
     }
 
-
     @Override
     @RateLimiter(name="apiRateLimiter")
     public List<FlightOffer> searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate) {
@@ -67,6 +66,8 @@ public class FlightServiceImpl implements FlightService{
 
             for (FlightAmadeus offer : flightOffers) {
                 FlightOffer flightOffer = new FlightOffer();
+                flightOffer.setCurrency(currencyCode);
+                flightOffer.setId(offer.getId());
                 List<Itinerary> itineraries = offer.getItineraries();
                 List<Segment> segments = itineraries.getFirst().getSegments();
                 flightOffer.setDepartureDate(LocalDateTime.parse(segments.getFirst().getDeparture().getAt()));
@@ -78,17 +79,36 @@ public class FlightServiceImpl implements FlightService{
                 flightOffer.setPricePerTraveler(offer.getTravelerPricings().getFirst().getPrice().getTotal());
                 flightOffer.setPriceTotal(offer.getPrice().getTotal());
                 flightOffer.setDuration(itineraries.getFirst().getDuration());
-                for(String codes : offer.getValidatingAirlineCodes())
-                {
-                    flightOffer.setAirlineCode(codes);
-                    flightOffer.setAirlineName(dictionary.getCarriers().get(codes));
-                }
-
+                flightOffer.setAirlineCode(segments.getFirst().getCarrierCode());
+                flightOffer.setAirlineName(dictionary.getCarriers().get(segments.getFirst().getCarrierCode()));
+                flightOffer.setCarrierCode(segments.getFirst().getOperating().getCarrierCode());
+                List<Stops> stops = new ArrayList<Stops>();
                 for (Segment segment : segments)
                 {
                     flightOffer.setCarrierCode(segment.getCarrierCode());
                     flightOffer.setCarrierName(dictionary.getCarriers().get(segment.getCarrierCode()));
+                    Stops stop = new Stops();
+                    stop.setAirlineCode(segment.getCarrierCode());
+                    stop.setAirlineName(dictionary.getCarriers().get(segment.getCarrierCode()));
+                    stop.setCarrierAirlineCode(segment.getOperating().getCarrierCode());
+                    stop.setCarrierAirlineName(dictionary.getCarriers().get(segment.getOperating().getCarrierCode()));
+                    stop.setArrivalAirportCode(segment.getArrival().getIataCode());
+                    stop.setArrivalAirportName(cities.get(segment.getArrival().getIataCode()));
+                    stop.setDepartureAirportCode(cities.get(segment.getDeparture().getIataCode()));
+                    stop.setDepartureAirportName(segment.getDeparture().getIataCode());
+                    stop.setDepartureTime(segment.getDeparture().getAt());
+                    stop.setArrivalTime(segment.getArrival().getAt());
+                    stop.setDurationTravel(segment.getDuration());
+                    stop.setFlightNumber(segment.getNumber());
+                    stop.setAircraft(segment.getAircraft().getCode());
+                    stop.setId(segment.getId());
+                    stops.add(stop);
                 }
+                for (int i = 0; i < offer.getTravelerPricings().getFirst().getFareDetailsBySegment().size(); i++) {
+                    stops.get(i).setFareDetailsBySegment(offer.getTravelerPricings().getFirst().getFareDetailsBySegment().get(i));
+
+                }
+                flightOffer.setStops(stops);
                 frontendResponse.add(flightOffer);
             }
             return frontendResponse;

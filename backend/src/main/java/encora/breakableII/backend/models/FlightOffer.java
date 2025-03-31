@@ -17,6 +17,25 @@ public class FlightOffer {
     private String duration;
     private String pricePerTraveler;
     private String priceTotal;
+    private String currency;
+    private List<Stops> stops;
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
 
     public String getDepartureAirportName() {
         return departureAirportName;
@@ -49,8 +68,6 @@ public class FlightOffer {
     public void setPriceTotal(String priceTotal) {
         this.priceTotal = priceTotal;
     }
-
-    private List<Stops> stops;
 
     public String getDepartureAirport() {
         return departureAirport;
