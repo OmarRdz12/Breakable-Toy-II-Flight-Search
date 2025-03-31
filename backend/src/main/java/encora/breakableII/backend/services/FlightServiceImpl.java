@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import encora.breakableII.backend.dao.FlightSearchDao;
 import encora.breakableII.backend.models.*;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -34,7 +37,9 @@ public class FlightServiceImpl implements FlightService{
         this.flightSearchDao = flightSearchDao;
     }
 
+
     @Override
+    @RateLimiter(name="apiRateLimiter")
     public List<FlightOffer> searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate) {
         RestTemplate restTemplate = new RestTemplate();
         String token = apiAuth.getAccessToken();
@@ -55,7 +60,6 @@ public class FlightServiceImpl implements FlightService{
             Dictionaries dictionary = responseMap.getDictionaries();
 
             Map<String, Location> locations = dictionary.getLocations();
-            System.out.println(locations);
             Map<String, String> cities = new HashMap<>();
             for (String key : locations.keySet()) {
                 cities.put(key, getLocations(key).getFirst().getCity());
@@ -73,7 +77,7 @@ public class FlightServiceImpl implements FlightService{
                 flightOffer.setArrivalAirportName(cities.get(destinationCode));
                 flightOffer.setPricePerTraveler(offer.getTravelerPricings().getFirst().getPrice().getTotal());
                 flightOffer.setPriceTotal(offer.getPrice().getTotal());
-
+                flightOffer.setDuration(itineraries.getFirst().getDuration());
                 for(String codes : offer.getValidatingAirlineCodes())
                 {
                     flightOffer.setAirlineCode(codes);
@@ -94,7 +98,11 @@ public class FlightServiceImpl implements FlightService{
         return frontendResponse;
     }
 
+
     @Override
+    @RateLimiter(name="apiRateLimiter")
+    @Bulkhead(name="apiRateLimiter")
+    @Retry(name="apiRetry")
     public List<Airport> getLocations(String name) {
         if(name.isEmpty()) {
             List<Airport> emptyList = new ArrayList<Airport>();
