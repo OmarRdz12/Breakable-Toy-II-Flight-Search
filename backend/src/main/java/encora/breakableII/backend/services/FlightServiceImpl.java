@@ -3,6 +3,7 @@ package encora.breakableII.backend.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import encora.breakableII.backend.dao.FlightSearchDao;
+import encora.breakableII.backend.entities.*;
 import encora.breakableII.backend.models.*;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
@@ -94,8 +95,8 @@ public class FlightServiceImpl implements FlightService{
                     stop.setCarrierAirlineName(dictionary.getCarriers().get(segment.getOperating().getCarrierCode()));
                     stop.setArrivalAirportCode(segment.getArrival().getIataCode());
                     stop.setArrivalAirportName(cities.get(segment.getArrival().getIataCode()));
-                    stop.setDepartureAirportCode(cities.get(segment.getDeparture().getIataCode()));
-                    stop.setDepartureAirportName(segment.getDeparture().getIataCode());
+                    stop.setDepartureAirportName(cities.get(segment.getDeparture().getIataCode()));
+                    stop.setDepartureAirportCode(segment.getDeparture().getIataCode());
                     stop.setDepartureTime(segment.getDeparture().getAt());
                     stop.setArrivalTime(segment.getArrival().getAt());
                     stop.setDurationTravel(segment.getDuration());

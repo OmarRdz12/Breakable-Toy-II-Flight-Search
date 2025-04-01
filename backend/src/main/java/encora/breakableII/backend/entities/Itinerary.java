@@ -1,4 +1,4 @@
-package encora.breakableII.backend.models;
+package encora.breakableII.backend.entities;
 
 import java.util.List;
 

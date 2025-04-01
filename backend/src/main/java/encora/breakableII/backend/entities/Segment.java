@@ -1,8 +1,7 @@
-package encora.breakableII.backend.models;
+package encora.breakableII.backend.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import java.util.Map;
+import encora.breakableII.backend.models.Site;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Segment {

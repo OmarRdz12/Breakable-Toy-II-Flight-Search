@@ -1,6 +1,8 @@
-package encora.breakableII.backend.models;
+package encora.breakableII.backend.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import encora.breakableII.backend.models.FareDetailsBySegment;
+import encora.breakableII.backend.models.Price;
 
 import java.util.List;
 

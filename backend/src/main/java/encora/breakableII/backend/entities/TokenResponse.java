@@ -1,4 +1,4 @@
-package encora.breakableII.backend.models;
+package encora.breakableII.backend.entities;
 
 public class TokenResponse {
     private String access_token;
