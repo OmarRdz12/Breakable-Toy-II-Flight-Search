@@ -14,6 +14,11 @@ export interface SearchForm {
     nonStop: boolean
 }
 
+export interface SortingForm {
+    priceSort: string,
+    durationSort: string
+}
+
 export interface TextInputProps {
     name: string
     placeholder?: string
