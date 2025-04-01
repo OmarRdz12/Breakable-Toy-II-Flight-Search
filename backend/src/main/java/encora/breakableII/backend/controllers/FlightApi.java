@@ -21,5 +21,9 @@ public interface FlightApi {
                                                  @RequestParam(name = "arrivalDate", required = false, defaultValue = "") String arrivalDate
 
     );
+    @GetMapping("/flights/sort")
+    ResponseEntity<List<FlightOffer>> sortFlights(@RequestParam(name = "priceSort", required = true, defaultValue = "") String priceSort,
+                                                 @RequestParam(name = "durationSort", required = true) String durationSort
+                                                  );
 
 }

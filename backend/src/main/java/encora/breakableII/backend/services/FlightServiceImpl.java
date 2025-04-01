@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class FlightServiceImpl implements FlightService{
@@ -112,6 +109,7 @@ public class FlightServiceImpl implements FlightService{
                 flightOffer.setStops(stops);
                 frontendResponse.add(flightOffer);
             }
+            flightSearchDao.setFlights(frontendResponse);
             return frontendResponse;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -158,5 +156,10 @@ public class FlightServiceImpl implements FlightService{
             e.printStackTrace();
         }
         return flightSearchDao.getLocation(name);
+    }
+
+    @Override
+    public List<FlightOffer> sortFlights(String priceSort, String durationSort) {
+        return flightSearchDao.sortFlights(priceSort, durationSort);
     }
 }

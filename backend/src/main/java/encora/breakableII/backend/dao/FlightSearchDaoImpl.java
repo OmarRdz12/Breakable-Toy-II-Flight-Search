@@ -1,14 +1,27 @@
 package encora.breakableII.backend.dao;
 
 import encora.breakableII.backend.models.Airport;
+import encora.breakableII.backend.models.FlightOffer;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class FlightSearchDaoImpl implements  FlightSearchDao {
     private static final List<Airport> airports = new ArrayList<>();
+    private List<FlightOffer> flightOffers = new ArrayList<>();
+
+    public List<FlightOffer> getFlightOffers() {
+        return flightOffers;
+    }
+
+    public void setFlightOffers(List<FlightOffer> flightOffers) {
+        this.flightOffers = flightOffers;
+    }
 
     static {
         airports.add(new Airport("ABADAN", "ABD", "IRAN"));
@@ -489,5 +502,42 @@ public class FlightSearchDaoImpl implements  FlightSearchDao {
         List<Airport> filterAirports = airports;
         filterAirports = new ArrayList<Airport>(filterAirports.stream().filter(airport -> airport.getCity().toLowerCase().contains(name) || airport.getCode().toLowerCase().contains(name) || airport.getCountry().toLowerCase().contains(name)).toList());
         return filterAirports;
+    }
+
+    @Override
+    public List<FlightOffer> sortFlights(String priceSort, String durationSort) {
+        if(priceSort.equals("") && durationSort.equals("")) {
+            return flightOffers;
+        } else {
+            List<FlightOffer> sortedFlights = flightOffers;
+            if (priceSort.equals("asc") && durationSort.equals("")) {
+                return sortedFlights.stream().sorted(Comparator.comparing(offer -> Double.parseDouble(offer.getPricePerTraveler()))).toList();
+            } else {
+                if (priceSort.equals("desc") && durationSort.equals("")) {
+                    return sortedFlights.stream().sorted(Comparator.comparing(offer -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())).toList();
+                } else {
+                    if (priceSort.equals("") && durationSort.equals("asc")) {
+                        return sortedFlights.stream().sorted(Comparator.comparing(offer -> Duration.parse(offer.getDuration()))).toList();
+                    } else {
+                        if (priceSort.equals("") && durationSort.equals("desc")) {
+                            return sortedFlights.stream().sorted(Comparator.comparing(offer -> Duration.parse(offer.getDuration()), Comparator.reverseOrder())).toList();
+                        } else {
+                            if (priceSort.equals("asc") && durationSort.equals("asc")) {
+                                return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()))
+                                        .thenComparing(offer -> Duration.parse(offer.getDuration()))).toList();
+                            } else {
+                                return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
+                                        .thenComparing(offer -> Duration.parse(offer.getDuration()), Comparator.reverseOrder())).toList();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setFlights(List<FlightOffer> offers) {
+        flightOffers = offers;
     }
 }
