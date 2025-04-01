@@ -1,4 +1,4 @@
-import React, { createContext, Dispatch, SetStateAction, useEffect, useState } from "react"
+import React, { createContext, Dispatch, SetStateAction, useState } from "react"
 import { FlightRespose, SearchForm } from "../interfaces/types"
 
 interface GlobalContextType {

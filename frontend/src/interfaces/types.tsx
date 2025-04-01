@@ -39,8 +39,8 @@ export interface Amenities {
 export interface FareDetailsBySegment {
     segmentId: number
     cabin: string
-    flightClass: string
-    amenities: any
+    class: string
+    amenities: Amenities[]
 }
 
 export interface Stops {
@@ -58,6 +58,7 @@ export interface Stops {
     carrierAirlineName: string
     aircraft: string
     id: string
+    segment?: number
     fareDetailsBySegment: FareDetailsBySegment
 }
 
