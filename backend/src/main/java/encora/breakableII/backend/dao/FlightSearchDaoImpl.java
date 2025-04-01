@@ -506,10 +506,10 @@ public class FlightSearchDaoImpl implements  FlightSearchDao {
 
     @Override
     public List<FlightOffer> sortFlights(String priceSort, String durationSort) {
+        List<FlightOffer> sortedFlights = new ArrayList<>(flightOffers);
         if(priceSort.equals("") && durationSort.equals("")) {
             return flightOffers;
         } else {
-            List<FlightOffer> sortedFlights = flightOffers;
             if (priceSort.equals("asc") && durationSort.equals("")) {
                 return sortedFlights.stream().sorted(Comparator.comparing(offer -> Double.parseDouble(offer.getPricePerTraveler()))).toList();
             } else {
@@ -526,8 +526,18 @@ public class FlightSearchDaoImpl implements  FlightSearchDao {
                                 return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()))
                                         .thenComparing(offer -> Duration.parse(offer.getDuration()))).toList();
                             } else {
-                                return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
-                                        .thenComparing(offer -> Duration.parse(offer.getDuration()), Comparator.reverseOrder())).toList();
+                                if (priceSort.equals("desc") && durationSort.equals("desc")) {
+                                    return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
+                                            .thenComparing(offer -> Duration.parse(offer.getDuration()), Comparator.reverseOrder())).toList();
+                                } else {
+                                    if (priceSort.equals("asc") && durationSort.equals("desc")) {
+                                        return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()))
+                                                .thenComparing(offer -> Duration.parse(offer.getDuration()), Comparator.reverseOrder())).toList();
+                                    } else {
+                                        return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
+                                                .thenComparing(offer -> Duration.parse(offer.getDuration()))).toList();
+                                    }
+                                }
                             }
                         }
                     }
