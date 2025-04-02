@@ -99,8 +99,8 @@ const FlightResults = () => {
                 : flights.length > 0 && flights[0].individualFlights.length > 1 &&
                 <>
                     {
-                        flights.map((flight: FlightRespose) => (
-                            <FlightRoundedCard {...flight} />
+                        flights.map((flight: FlightRespose, index: number) => (
+                            <FlightRoundedCard key={index} {...flight} />
                         ))
                     }
                 </>

@@ -11,6 +11,7 @@ import { GlobalContext } from "../context/GlobalContext"
 import InputText from "../components/inputs/InputText"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 const SearchPanel = () => {
     const url = import.meta.env.VITE_API_URL
@@ -22,6 +23,7 @@ const SearchPanel = () => {
     const { searchForm, setSearchForm, setFlights } = context
     const [departure, setDeparture] = useState<BasicSelect[]>([])
     const [arrival, setArrival] = useState<BasicSelect[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
     async function fetchAirportList(city: string): Promise<BasicSelect[]> {
         return fetch(`${url}locations?name=${city}`)
@@ -38,11 +40,22 @@ const SearchPanel = () => {
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const data = await axios.get(`${url}flights?originLocationCode=${searchForm.originLocationCode}&destinationLocationCode=${searchForm.destinationCode}&departureDate=${searchForm.departureDate}${searchForm.arrivalDate === "" ? "" : `&arrivalDate=${searchForm.arrivalDate}`}&adults=${searchForm.adults}&currencyCode=${searchForm.currency}&nonStop=${searchForm.nonStop}`)
-        const flightResponses: FlightRespose[] = data.data
-        console.log(data.data)
-        setFlights(flightResponses)
-        navigate('/flights')
+        if (!searchForm.adults || !searchForm.originLocationCode || !searchForm.destinationCode || !searchForm.departureDate || !searchForm.currency) {
+            toast.error("Fill in all required fields")
+            return
+        }
+        try {
+            setLoading(true)
+            const data = await axios.get(`${url}flights?originLocationCode=${searchForm.originLocationCode}&destinationLocationCode=${searchForm.destinationCode}&departureDate=${searchForm.departureDate}${searchForm.arrivalDate === "" ? "" : `&arrivalDate=${searchForm.arrivalDate}`}&adults=${searchForm.adults}&currencyCode=${searchForm.currency}&nonStop=${searchForm.nonStop}`)
+            const flightResponses: FlightRespose[] = data.data
+            setFlights(flightResponses)
+            navigate('/flights')
+        } catch (error) {
+            toast.warning('The server is busy, please wait')
+        } finally {
+            setLoading(false)
+        }
+
     }
 
     const onChangeDeparture: DatePickerProps['onChange'] = (date) => {
@@ -50,7 +63,7 @@ const SearchPanel = () => {
     }
 
     const onChangeArrival: DatePickerProps['onChange'] = (date) => {
-        setSearchForm((prev: SearchForm) => ({ ...prev, ["arrivalDate"]: date ?  date.format("YYYY-MM-DD") : "" }))
+        setSearchForm((prev: SearchForm) => ({ ...prev, ["arrivalDate"]: date ? date.format("YYYY-MM-DD") : "" }))
     }
 
     const onChangeBox: CheckboxProps['onChange'] = (e) => {
@@ -76,6 +89,7 @@ const SearchPanel = () => {
                     value={departure}
                     setValue={setDeparture}
                     setValueForm={onChangeForm}
+                    required
                 />
                 <InputDebounceSelect
                     label="Arrival airport"
@@ -84,6 +98,7 @@ const SearchPanel = () => {
                     value={arrival}
                     setValue={setArrival}
                     setValueForm={onChangeForm}
+                    required
                 />
                 <InputDate
                     name="dep-date"
@@ -94,6 +109,7 @@ const SearchPanel = () => {
                     maxDate={searchForm.arrivalDate === "" ? undefined : searchForm.arrivalDate}
                     size="large"
                     className="w-1/2"
+                    required
                 />
                 <InputDate
                     name="ret-date"
@@ -118,6 +134,7 @@ const SearchPanel = () => {
                     value={searchForm.currency}
                     className="w-1/2"
                     size="large"
+                    required
                 />
                 <InputText
                     name="adults"
@@ -140,6 +157,7 @@ const SearchPanel = () => {
                         size="large"
                         className="w-1/2 !bg-zinc-700 !text-white shadow hover:!bg-zinc-500 
                         hover:!border-zinc-500 hover:!text-white"
+                        loading={loading}
                     />
                 </div>
             </form>

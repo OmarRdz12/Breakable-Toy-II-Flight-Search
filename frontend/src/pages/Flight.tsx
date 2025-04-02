@@ -29,13 +29,13 @@ const Flight = () => {
             <BaseButton htmlType="button" text="Return to Results" className="w-1/2 !bg-zinc-700 !text-white shadow hover:!bg-zinc-500 
                         hover:!border-zinc-500 hover:!text-white" onClick={onClick} size="large"
             />
-            <div className='w-full min-h-full flex'>
+            <div className='w-full h-fit flex items-center'>
                 <div className='w-3/4 flex flex-col min-h-full items-center p-4'>
                     {
                         flight?.individualFlights.map((individualFlight: IndividualFlight, index: number) => (
                             <div className='flex flex-col w-full items-center gap-4' key={index}>
                                 {
-                                    index === 1 ? <p key={100} className='text-xl font-bold'>Going </p> : <p key={100} className='text-xl font-bold'>Returning</p>
+                                    index === 1 ? <p key={100} className='text-xl font-bold'>Return </p> : <p key={100} className='text-xl font-bold'>Going</p>
                                 }
                                 {
                                     individualFlight.stops.map((stop: Stops, indexInside: number) => (
@@ -47,13 +47,13 @@ const Flight = () => {
                     }
                     
                 </div>
-                <div className='w-1/4 min-h-full border border-black flex flex-col p-4 gap-4'>
+                <div className='w-1/4 h-full items-center border border-black flex flex-col p-4 gap-4'>
                     <h3 className="font-bold text-lg">Price Breakdown</h3>
                     <div>
-                        <p className='text-sm'><span className='font-bold'>Base: </span> {flight?.pricePerTraveler}</p>
+                        <p className='text-sm'><span className='font-bold'>Base: </span> ${flight?.pricePerTraveler}</p>
                     </div>
                     <div>
-                        <p className='text-sm'><span className='font-bold'>Total: </span> {flight?.priceTotal}</p>
+                        <p className='text-sm'><span className='font-bold'>Total: </span> ${flight?.priceTotal}</p>
                     </div>
                 </div>
             </div>

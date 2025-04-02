@@ -7,6 +7,7 @@ import { BasicSelect } from '../../interfaces/types';
 interface InputDebounceSelectProps {
   label: string,
   id: string,
+  required?: boolean
   fetchData: (search: string) => Promise<BasicSelect[]>
   value: BasicSelect[]
   setValue: (newValue: BasicSelect[]) => void
@@ -64,12 +65,13 @@ const InputDebounceSelect = ({
   fetchData,
   value,
   setValue,
-  setValueForm
+  setValueForm,
+  required = false
 }: InputDebounceSelectProps) => {
 
   return (
     <div className="flex gap-4 mt-4 items-start justify-start w-full">
-      <label htmlFor={id} className="w-1/4"> {label}</label>
+      <label htmlFor={id} className="w-1/4">{label} {required && <span className='text-red-500'>*</span>} </label>
       <DebounceSelect
         maxCount={1}
         mode="multiple"
