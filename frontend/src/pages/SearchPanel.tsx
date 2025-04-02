@@ -2,7 +2,7 @@ import { useContext, useState } from "react"
 import InputSelect from "../components/inputs/InputSelect"
 import InputDate from "../components/inputs/InputDate"
 import { CheckboxProps, DatePickerProps } from "antd"
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import BaseButton from "../components/Button"
 import InputCheckbox from "../components/inputs/InputCheckbox"
 import InputDebounceSelect from "../components/inputs/InputDebounceSelect"
