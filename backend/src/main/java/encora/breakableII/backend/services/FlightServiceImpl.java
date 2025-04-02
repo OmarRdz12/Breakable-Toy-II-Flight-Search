@@ -7,7 +7,6 @@ import encora.breakableII.backend.entities.*;
 import encora.breakableII.backend.models.*;
 import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
-import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
