@@ -38,7 +38,7 @@ public class FlightServiceImpl implements FlightService{
 
     @Override
     @RateLimiter(name="apiRateLimiter")
-    public List<FlightOffer> searchLocations(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate) {
+    public List<FlightOffer> searchFlights(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate) {
         RestTemplate restTemplate = new RestTemplate();
         String token = apiAuth.getAccessToken();
         HttpHeaders headers = new HttpHeaders();

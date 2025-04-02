@@ -25,7 +25,7 @@ public class FlightApiImpl implements FlightApi{
 
     @Override
     public ResponseEntity<List<FlightOffer>> getFlights(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate) {
-        return new ResponseEntity<>(flightService.searchLocations(originLocationCode, destinationCode, departureDate, adults, nonStop, currencyCode, arrivalDate), HttpStatus.OK);
+        return new ResponseEntity<>(flightService.searchFlights(originLocationCode, destinationCode, departureDate, adults, nonStop, currencyCode, arrivalDate), HttpStatus.OK);
     }
 
     @Override
