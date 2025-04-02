@@ -15,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -59,55 +60,81 @@ public class FlightServiceImpl implements FlightService{
             Map<String, Location> locations = dictionary.getLocations();
             Map<String, String> cities = new HashMap<>();
             for (String key : locations.keySet()) {
-                cities.put(key, getLocations(key).getFirst().getCity());
+                try {
+                    cities.put(key, getLocations(key).getFirst().getCity());
+                } catch (Exception e) {
+                    cities.put(key, "");
+                }
+
             }
 
             for (FlightAmadeus offer : flightOffers) {
                 FlightOffer flightOffer = new FlightOffer();
-                flightOffer.setCurrency(currencyCode);
                 flightOffer.setId(offer.getId());
-                List<Itinerary> itineraries = offer.getItineraries();
-                List<Segment> segments = itineraries.getFirst().getSegments();
-                flightOffer.setDepartureDate(LocalDateTime.parse(segments.getFirst().getDeparture().getAt()));
-                flightOffer.setArrivalDateTime(LocalDateTime.parse(segments.getLast().getArrival().getAt()));
-                flightOffer.setDepartureAirport(originLocationCode);
-                flightOffer.setDepartureAirportName(cities.get(originLocationCode));
-                flightOffer.setArrivalAirport(destinationCode);
-                flightOffer.setArrivalAirportName(cities.get(destinationCode));
                 flightOffer.setPricePerTraveler(offer.getTravelerPricings().getFirst().getPrice().getTotal());
                 flightOffer.setPriceTotal(offer.getPrice().getTotal());
-                flightOffer.setDuration(itineraries.getFirst().getDuration());
-                flightOffer.setAirlineCode(segments.getFirst().getCarrierCode());
-                flightOffer.setAirlineName(dictionary.getCarriers().get(segments.getFirst().getCarrierCode()));
-                flightOffer.setCarrierCode(segments.getFirst().getOperating().getCarrierCode());
-                List<Stops> stops = new ArrayList<Stops>();
-                for (Segment segment : segments)
-                {
-                    flightOffer.setCarrierCode(segment.getCarrierCode());
-                    flightOffer.setCarrierName(dictionary.getCarriers().get(segment.getCarrierCode()));
-                    Stops stop = new Stops();
-                    stop.setAirlineCode(segment.getCarrierCode());
-                    stop.setAirlineName(dictionary.getCarriers().get(segment.getCarrierCode()));
-                    stop.setCarrierAirlineCode(segment.getOperating().getCarrierCode());
-                    stop.setCarrierAirlineName(dictionary.getCarriers().get(segment.getOperating().getCarrierCode()));
-                    stop.setArrivalAirportCode(segment.getArrival().getIataCode());
-                    stop.setArrivalAirportName(cities.get(segment.getArrival().getIataCode()));
-                    stop.setDepartureAirportName(cities.get(segment.getDeparture().getIataCode()));
-                    stop.setDepartureAirportCode(segment.getDeparture().getIataCode());
-                    stop.setDepartureTime(segment.getDeparture().getAt());
-                    stop.setArrivalTime(segment.getArrival().getAt());
-                    stop.setDurationTravel(segment.getDuration());
-                    stop.setFlightNumber(segment.getNumber());
-                    stop.setAircraft(segment.getAircraft().getCode());
-                    stop.setId(segment.getId());
-                    stops.add(stop);
-                }
-                for (int i = 0; i < offer.getTravelerPricings().getFirst().getFareDetailsBySegment().size(); i++) {
-                    stops.get(i).setFareDetailsBySegment(offer.getTravelerPricings().getFirst().getFareDetailsBySegment().get(i));
+                List<Itinerary> itineraries = offer.getItineraries();
+                List<IndividualFlight> individualFlights = new ArrayList<>();
+                Duration totalDuration = Duration.ZERO;
+                int contItinerary = 0;
+                for (Itinerary itinerary : itineraries) {
+                    IndividualFlight individualFlight = new IndividualFlight();
+                    individualFlight.setCurrency(currencyCode);
+                    List<Segment> segments = itinerary.getSegments();
+                    individualFlight.setDepartureDate(LocalDateTime.parse(segments.getFirst().getDeparture().getAt()));
+                    individualFlight.setArrivalDateTime(LocalDateTime.parse(segments.getLast().getArrival().getAt()));
+                    individualFlight.setDepartureAirport(segments.getFirst().getDeparture().getIataCode());
+                    individualFlight.setDepartureAirportName(cities.get(segments.getFirst().getDeparture().getIataCode()));
+                    individualFlight.setArrivalAirport(segments.getLast().getArrival().getIataCode());
+                    individualFlight.setArrivalAirportName(cities.get(segments.getLast().getArrival().getIataCode()));
+                    individualFlight.setDuration(itinerary.getDuration());
+                    totalDuration = totalDuration.plus(Duration.parse(itinerary.getDuration()));
+                    individualFlight.setAirlineCode(segments.getFirst().getCarrierCode());
+                    try {
+                        individualFlight.setAirlineName(dictionary.getCarriers().get(segments.getFirst().getCarrierCode()));
+                        individualFlight.setCarrierCode(segments.getFirst().getOperating().getCarrierCode());
+                    } catch (Exception e) {
+                        individualFlight.setAirlineName("");
+                        individualFlight.setCarrierCode("");
+                    }
 
+                    individualFlight.setCarrierName(dictionary.getCarriers().get(segments.getFirst().getCarrierCode()));
+                    List<Stops> stops = new ArrayList<Stops>();
+                    for (Segment segment : segments)
+                    {
+                        Stops stop = new Stops();
+                        stop.setAirlineCode(segment.getCarrierCode());
+                        stop.setAirlineName(dictionary.getCarriers().get(segment.getCarrierCode()));
+                        try {
+                            stop.setCarrierAirlineCode(segment.getOperating().getCarrierCode());
+                            stop.setCarrierAirlineName(dictionary.getCarriers().get(segment.getOperating().getCarrierCode()));
+                        } catch (Exception e) {
+                            stop.setCarrierAirlineCode("");
+                            stop.setCarrierAirlineName("");
+                        }
+                        stop.setArrivalAirportCode(segment.getArrival().getIataCode());
+                        stop.setArrivalAirportName(cities.get(segment.getArrival().getIataCode()));
+                        stop.setDepartureAirportName(cities.get(segment.getDeparture().getIataCode()));
+                        stop.setDepartureAirportCode(segment.getDeparture().getIataCode());
+                        stop.setDepartureTime(segment.getDeparture().getAt());
+                        stop.setArrivalTime(segment.getArrival().getAt());
+                        stop.setDurationTravel(segment.getDuration());
+                        stop.setFlightNumber(segment.getNumber());
+                        stop.setAircraft(segment.getAircraft().getCode());
+                        stop.setId(segment.getId());
+                        stops.add(stop);
+                    }
+                    for (int i = 0; i < itinerary.getSegments().size(); i++) {
+                        stops.get(i).setFareDetailsBySegment(offer.getTravelerPricings().getFirst().getFareDetailsBySegment().get(i + contItinerary));
+                    }
+                    contItinerary += itinerary.getSegments().size();
+                    individualFlight.setStops(stops);
+                    individualFlights.add(individualFlight);
                 }
-                flightOffer.setStops(stops);
+                flightOffer.setTotalDuration(totalDuration);
+                flightOffer.setIndividualFlights(individualFlights);
                 frontendResponse.add(flightOffer);
+
             }
             flightSearchDao.setFlights(frontendResponse);
             return frontendResponse;
@@ -121,7 +148,6 @@ public class FlightServiceImpl implements FlightService{
     @Override
     @RateLimiter(name="apiRateLimiter")
     @Bulkhead(name="apiRateLimiter")
-    @Retry(name="apiRetry")
     public List<Airport> getLocations(String name) {
         if(name.isEmpty()) {
             List<Airport> emptyList = new ArrayList<Airport>();
