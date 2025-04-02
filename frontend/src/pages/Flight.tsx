@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GlobalContext } from '../context/GlobalContext';
-import { FlightRespose, Stops } from '../interfaces/types';
-import DetailsCard from '../components/DetailsCard';
+import { FlightRespose, IndividualFlight, Stops } from '../interfaces/types';
+import DetailsCard from '../components/Cards/DetailsCard';
 import BaseButton from '../components/Button';
 
 const Flight = () => {
@@ -32,11 +32,20 @@ const Flight = () => {
             <div className='w-full min-h-full flex'>
                 <div className='w-3/4 flex flex-col min-h-full items-center p-4'>
                     {
-                        flight?.stops.map((stop: Stops, index: number) => (
-                            <DetailsCard {...stop} key={index} segment={index + 1} />
+                        flight?.individualFlights.map((individualFlight: IndividualFlight, index: number) => (
+                            <div className='flex flex-col w-full items-center gap-4' key={index}>
+                                {
+                                    index === 1 ? <p key={100} className='text-xl font-bold'>Going </p> : <p key={100} className='text-xl font-bold'>Returning</p>
+                                }
+                                {
+                                    individualFlight.stops.map((stop: Stops, indexInside: number) => (
+                                        <DetailsCard {...stop} key={indexInside} segment={index === 2 ? indexInside + 1 - flight.individualFlights[0].stops.length : indexInside + 1} />
+                                    ))
+                                }
+                            </div>
                         ))
                     }
-
+                    
                 </div>
                 <div className='w-1/4 min-h-full border border-black flex flex-col p-4 gap-4'>
                     <h3 className="font-bold text-lg">Price Breakdown</h3>

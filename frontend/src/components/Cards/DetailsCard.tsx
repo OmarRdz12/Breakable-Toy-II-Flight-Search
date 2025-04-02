@@ -1,4 +1,4 @@
-import { Amenities, Stops } from "../interfaces/types"
+import { Amenities, Stops } from "../../interfaces/types"
 
 const DetailsCard = ({
     departureAirportName,
@@ -28,7 +28,7 @@ const DetailsCard = ({
                 <p className="font-bold">{`${departureAirportName} (${departureAirportCode}) - ${arrivalAirportName} (${arrivalAirportCode})`}</p>
                 <p className="text-sm font-semibold mt-4">{`${airlineName} (${airlineCode})`}</p>
                 {
-                    carrierAirlineCode !== airlineCode &&
+                    carrierAirlineCode !== airlineCode && carrierAirlineCode != "" &&
                     <p className="text-sm font-semibold">{`Operating: ${carrierAirlineName} (${carrierAirlineCode})`}</p>
                 }
                 <p className=" text-sm">{durationTravel.replace("PT", "").replace("H", " hrs ").replace("M", " min")}</p>

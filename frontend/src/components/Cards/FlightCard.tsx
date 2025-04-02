@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { FlightRespose } from "../interfaces/types"
+import { FlightRespose, IndividualFlight } from "../../interfaces/types"
 
 const FlightCard = ({
     departureDate,
@@ -15,7 +15,7 @@ const FlightCard = ({
     airlineName,
     currency,
     id
-}: FlightRespose) => {
+}: Omit<FlightRespose, "individualFlights"> & IndividualFlight) => {
     const navigate = useNavigate()
     const departureDateFormat = departureDate.split("T")
     const arrivalDateFormat = arrivalDateTime.split("T")

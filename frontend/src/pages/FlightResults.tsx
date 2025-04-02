@@ -1,11 +1,12 @@
 import { useContext } from "react"
 import { GlobalContext } from "../context/GlobalContext"
-import { FlightRespose, SortingForm } from "../interfaces/types"
-import FlightCard from "../components/FlightCard"
+import { FlightRespose, IndividualFlight, SortingForm } from "../interfaces/types"
+import FlightCard from "../components/Cards/FlightCard"
 import BaseButton from "../components/Button"
 import { useNavigate } from "react-router-dom"
 import InputSelect from "../components/inputs/InputSelect"
 import axios from "axios"
+import FlightRoundedCard from "../components/Cards/FlightRoundedCard"
 
 const FlightResults = () => {
     const context = useContext(GlobalContext)
@@ -28,7 +29,6 @@ const FlightResults = () => {
         const url = import.meta.env.VITE_API_URL
         const data = await axios.get(`${url}flights/sort?priceSort=${sortingForm.priceSort}&durationSort=${sortingForm.durationSort}`)
         const flightResponses: FlightRespose[] = data.data
-        console.log(data.data)
         setFlights(flightResponses)
     }
 
@@ -75,11 +75,37 @@ const FlightResults = () => {
             </form>
 
             {
-                flights.map((flight: FlightRespose, index: number) => (
-                    <FlightCard {...flight} key={index} />
-                ))
-            }
+                flights.length > 0 && flights[0].individualFlights.length === 1 ?
+                <>
+                    {
+                        flights.map((flight: FlightRespose) => (
+                            <>
+                                {
+                                    flight.individualFlights.map((individualFlight: IndividualFlight, index: number) => (
+                                        <FlightCard
+                                            {...individualFlight}
+                                            id={flight.id}
+                                            priceTotal={flight.priceTotal}
+                                            pricePerTraveler={flight.pricePerTraveler}
+                                            totalDuration={flight.totalDuration}
+                                            key={index}
+                                        />
+                                    ))
+                                }
+                            </>
+                        ))
+                    }
+                </>
+                : flights.length > 0 && flights[0].individualFlights.length > 1 &&
+                <>
+                    {
+                        flights.map((flight: FlightRespose) => (
+                            <FlightRoundedCard {...flight} />
+                        ))
+                    }
+                </>
 
+            }
         </div>
     )
 }
