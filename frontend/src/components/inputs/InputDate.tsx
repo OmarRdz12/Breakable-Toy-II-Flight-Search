@@ -11,6 +11,8 @@ interface InputDateProps {
     name: string
     value?: string | number | Dayjs | Date | null | undefined
     className?: string
+    minDate?: string
+    maxDate?: string
 }
 
 const InputDate = ({
@@ -21,7 +23,9 @@ const InputDate = ({
     name,
     size,
     value,
-    className
+    className,
+    minDate,
+    maxDate
 }: InputDateProps) => {
     return (
         <div className="flex gap-4 mt-4 items-start justify-start w-full">
@@ -31,7 +35,8 @@ const InputDate = ({
                 id={id}
                 onChange={onChange}
                 required={required}
-                minDate={dayjs(Date.now())}
+                maxDate={maxDate ?  dayjs(maxDate) : undefined}
+                minDate={minDate ?  dayjs(minDate) : dayjs(Date.now())}
                 size={size}
                 value={value}
                 className={className}

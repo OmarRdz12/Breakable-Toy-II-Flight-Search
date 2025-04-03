@@ -10,6 +10,7 @@ interface InputDebounceSelectProps {
   fetchData: (search: string) => Promise<BasicSelect[]>
   value: BasicSelect[]
   setValue: (newValue: BasicSelect[]) => void
+  setValueForm: (value: string, name: string) => void
 }
 
 export interface DebounceSelectProps<ValueType = any>
@@ -62,7 +63,8 @@ const InputDebounceSelect = ({
   id,
   fetchData,
   value,
-  setValue
+  setValue,
+  setValueForm
 }: InputDebounceSelectProps) => {
 
   return (
@@ -77,7 +79,9 @@ const InputDebounceSelect = ({
         size="large"
         onChange={(newValue) => {
           if (Array.isArray(newValue)) {
-            setValue(newValue);
+            setValue(newValue)
+              const { value } = newValue[0] || { value: ""}
+              setValueForm(value, id)   
           }
         }}
       />

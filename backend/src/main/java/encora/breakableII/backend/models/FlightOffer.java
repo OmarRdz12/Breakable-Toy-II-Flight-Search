@@ -6,13 +6,84 @@ import java.util.List;
 public class FlightOffer {
     private LocalDateTime departureDate;
     private LocalDateTime arrivalDateTime;
+    private String departureAirport;
+    private String departureAirportName;
+    private String arrivalAirport;
+    private String arrivalAirportName;
     private String airlineName;
     private String airlineCode;
     private String carrierName;
     private String carrierCode;
-    private int duration;
-    private float price;
+    private String duration;
+    private String pricePerTraveler;
+    private String priceTotal;
+    private String currency;
     private List<Stops> stops;
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public String getDepartureAirportName() {
+        return departureAirportName;
+    }
+
+    public void setDepartureAirportName(String departureAirportName) {
+        this.departureAirportName = departureAirportName;
+    }
+
+    public String getArrivalAirportName() {
+        return arrivalAirportName;
+    }
+
+    public void setArrivalAirportName(String arrivalAirportName) {
+        this.arrivalAirportName = arrivalAirportName;
+    }
+
+    public String getPricePerTraveler() {
+        return pricePerTraveler;
+    }
+
+    public void setPricePerTraveler(String pricePerTraveler) {
+        this.pricePerTraveler = pricePerTraveler;
+    }
+
+    public String getPriceTotal() {
+        return priceTotal;
+    }
+
+    public void setPriceTotal(String priceTotal) {
+        this.priceTotal = priceTotal;
+    }
+
+    public String getDepartureAirport() {
+        return departureAirport;
+    }
+
+    public void setDepartureAirport(String departureAirport) {
+        this.departureAirport = departureAirport;
+    }
+
+    public String getArrivalAirport() {
+        return arrivalAirport;
+    }
+
+    public void setArrivalAirport(String arrivalAirport) {
+        this.arrivalAirport = arrivalAirport;
+    }
 
     public LocalDateTime getDepartureDate() {
         return departureDate;
@@ -62,20 +133,12 @@ public class FlightOffer {
         this.carrierCode = carrierCode;
     }
 
-    public int getDuration() {
+    public String getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(String duration) {
         this.duration = duration;
-    }
-
-    public float getPrice() {
-        return price;
-    }
-
-    public void setPrice(float price) {
-        this.price = price;
     }
 
     public List<Stops> getStops() {

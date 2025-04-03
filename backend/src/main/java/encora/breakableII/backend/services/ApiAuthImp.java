@@ -1,6 +1,6 @@
 package encora.breakableII.backend.services;
 
-import encora.breakableII.backend.models.TokenResponse;
+import encora.breakableII.backend.entities.TokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
