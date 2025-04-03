@@ -135,7 +135,6 @@ public class FlightServiceImpl implements FlightService{
                 frontendResponse.add(flightOffer);
 
             }
-            flightSearchDao.setFlights(frontendResponse);
             return frontendResponse;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -152,7 +151,7 @@ public class FlightServiceImpl implements FlightService{
             List<Airport> emptyList = new ArrayList<Airport>();
             return emptyList;
         }
-        String token = apiAuth.getAccessToken();
+       String token = apiAuth.getAccessToken();
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
@@ -184,7 +183,44 @@ public class FlightServiceImpl implements FlightService{
     }
 
     @Override
-    public List<FlightOffer> sortFlights(String priceSort, String durationSort) {
-        return flightSearchDao.sortFlights(priceSort, durationSort);
+    public List<FlightOffer> sortFlights(String priceSort, String durationSort, List<FlightOffer> flightOffers) {
+        List<FlightOffer> sortedFlights = new ArrayList<>(flightOffers);
+        if(priceSort.equals("") && durationSort.equals("")) {
+            return flightOffers;
+        } else {
+            if (priceSort.equals("asc") && durationSort.equals("")) {
+                return sortedFlights.stream().sorted(Comparator.comparing(offer -> Double.parseDouble(offer.getPricePerTraveler()))).toList();
+            } else {
+                if (priceSort.equals("desc") && durationSort.equals("")) {
+                    return sortedFlights.stream().sorted(Comparator.comparing(offer -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())).toList();
+                } else {
+                    if (priceSort.equals("") && durationSort.equals("asc")) {
+                        return sortedFlights.stream().sorted(Comparator.comparing(FlightOffer::getTotalDuration)).toList();
+                    } else {
+                        if (priceSort.equals("") && durationSort.equals("desc")) {
+                            return sortedFlights.stream().sorted(Comparator.comparing(FlightOffer::getTotalDuration, Comparator.reverseOrder())).toList();
+                        } else {
+                            if (priceSort.equals("asc") && durationSort.equals("asc")) {
+                                return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()))
+                                        .thenComparing(FlightOffer::getTotalDuration)).toList();
+                            } else {
+                                if (priceSort.equals("desc") && durationSort.equals("desc")) {
+                                    return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
+                                            .thenComparing(FlightOffer::getTotalDuration, Comparator.reverseOrder())).toList();
+                                } else {
+                                    if (priceSort.equals("asc") && durationSort.equals("desc")) {
+                                        return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()))
+                                                .thenComparing(FlightOffer::getTotalDuration, Comparator.reverseOrder())).toList();
+                                    } else {
+                                        return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
+                                                .thenComparing(FlightOffer::getTotalDuration)).toList();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

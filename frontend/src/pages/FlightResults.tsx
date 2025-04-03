@@ -27,7 +27,7 @@ const FlightResults = () => {
     const onSort = async (e: React.FormEvent) => {
         e.preventDefault()
         const url = import.meta.env.VITE_API_URL
-        const data = await axios.get(`${url}flights/sort?priceSort=${sortingForm.priceSort}&durationSort=${sortingForm.durationSort}`)
+        const data = await axios.post(`${url}flights/sort?priceSort=${sortingForm.priceSort}&durationSort=${sortingForm.durationSort}`, flights)
         const flightResponses: FlightRespose[] = data.data
         setFlights(flightResponses)
     }
@@ -44,7 +44,7 @@ const FlightResults = () => {
                     label="Price"
                     id="priceSort"
                     options={[
-                        { label: "Origin", value: '' },
+                        { label: "", value: '' },
                         { label: "Ascending", value: 'asc' },
                         { label: "Descending", value: 'desc' },
                     ]}
@@ -59,7 +59,7 @@ const FlightResults = () => {
                     label="Duration"
                     id="durationSort"
                     options={[
-                        { label: "Origin", value: '' },
+                        { label: "", value: '' },
                         { label: "Ascending", value: 'asc' },
                         { label: "Descending", value: 'desc' },
                     ]}

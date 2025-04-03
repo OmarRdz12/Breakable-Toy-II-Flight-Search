@@ -48,7 +48,7 @@ public class FlightApiImpl implements FlightApi{
     }
 
     @Override
-    public ResponseEntity<List<FlightOffer>> sortFlights(String priceSort, String durationSort) {
-        return new ResponseEntity<>(flightService.sortFlights(priceSort, durationSort), HttpStatus.OK);
+    public ResponseEntity<List<FlightOffer>> sortFlights(String priceSort, String durationSort, List<FlightOffer> flightOffers) {
+        return new ResponseEntity<>(flightService.sortFlights(priceSort, durationSort, flightOffers), HttpStatus.OK);
     }
 }

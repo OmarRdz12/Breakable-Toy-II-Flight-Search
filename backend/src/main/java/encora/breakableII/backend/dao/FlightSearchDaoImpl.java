@@ -13,15 +13,6 @@ import java.util.stream.Collectors;
 @Repository
 public class FlightSearchDaoImpl implements  FlightSearchDao {
     private static final List<Airport> airports = new ArrayList<>();
-    private List<FlightOffer> flightOffers = new ArrayList<>();
-
-    public List<FlightOffer> getFlightOffers() {
-        return flightOffers;
-    }
-
-    public void setFlightOffers(List<FlightOffer> flightOffers) {
-        this.flightOffers = flightOffers;
-    }
 
     static {
         airports.add(new Airport("ABADAN", "ABD", "IRAN"));
@@ -500,54 +491,7 @@ public class FlightSearchDaoImpl implements  FlightSearchDao {
     @Override
     public List<Airport> getLocation(String name) {
         List<Airport> filterAirports = airports;
-        filterAirports = new ArrayList<Airport>(filterAirports.stream().filter(airport -> airport.getCity().toLowerCase().contains(name) || airport.getCode().toLowerCase().contains(name) || airport.getCountry().toLowerCase().contains(name)).toList());
+        filterAirports = new ArrayList<Airport>(filterAirports.stream().filter(airport -> airport.getCity().toLowerCase().contains(name.toLowerCase()) || airport.getCode().toLowerCase().contains(name.toLowerCase()) || airport.getCountry().toLowerCase().contains(name.toLowerCase())).toList());
         return filterAirports;
-    }
-
-    @Override
-    public List<FlightOffer> sortFlights(String priceSort, String durationSort) {
-        List<FlightOffer> sortedFlights = new ArrayList<>(flightOffers);
-        if(priceSort.equals("") && durationSort.equals("")) {
-            return flightOffers;
-        } else {
-            if (priceSort.equals("asc") && durationSort.equals("")) {
-                return sortedFlights.stream().sorted(Comparator.comparing(offer -> Double.parseDouble(offer.getPricePerTraveler()))).toList();
-            } else {
-                if (priceSort.equals("desc") && durationSort.equals("")) {
-                    return sortedFlights.stream().sorted(Comparator.comparing(offer -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())).toList();
-                } else {
-                    if (priceSort.equals("") && durationSort.equals("asc")) {
-                        return sortedFlights.stream().sorted(Comparator.comparing(FlightOffer::getTotalDuration)).toList();
-                    } else {
-                        if (priceSort.equals("") && durationSort.equals("desc")) {
-                            return sortedFlights.stream().sorted(Comparator.comparing(FlightOffer::getTotalDuration, Comparator.reverseOrder())).toList();
-                        } else {
-                            if (priceSort.equals("asc") && durationSort.equals("asc")) {
-                                return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()))
-                                        .thenComparing(FlightOffer::getTotalDuration)).toList();
-                            } else {
-                                if (priceSort.equals("desc") && durationSort.equals("desc")) {
-                                    return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
-                                            .thenComparing(FlightOffer::getTotalDuration, Comparator.reverseOrder())).toList();
-                                } else {
-                                    if (priceSort.equals("asc") && durationSort.equals("desc")) {
-                                        return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()))
-                                                .thenComparing(FlightOffer::getTotalDuration, Comparator.reverseOrder())).toList();
-                                    } else {
-                                        return sortedFlights.stream().sorted(Comparator.comparing((FlightOffer offer) -> Double.parseDouble(offer.getPricePerTraveler()), Comparator.reverseOrder())
-                                                .thenComparing(FlightOffer::getTotalDuration)).toList();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void setFlights(List<FlightOffer> offers) {
-        flightOffers = offers;
     }
 }
