@@ -34,4 +34,4 @@ The results show an overview of available flights and can be sorted by duration 
 ```
 6. You can read the individual readme to better understand the project
 - [Frontend Readme](frontend/README.md)
-- [Backend Readme](beckend/README.md)
+- [Backend Readme](backend/README.md)
