@@ -10,5 +10,5 @@ The backend API is divided into three essential parts:
 ```bash
   API_KEY = YOUR AMADEUS API KEY
   API_SECRET = YOUR AMADEUS API SECRET
-  FRONTEND_URL = http://localhost:5173
+  FRONTEND_URL = http://localhost:5053
 ```
