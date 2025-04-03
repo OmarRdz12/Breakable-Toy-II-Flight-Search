@@ -20,13 +20,13 @@ The results show an overview of available flights and can be sorted by duration 
 ```
 3. In the frontend create a .env file inside frontend/
 ```bash
-  VITE_API_URL = http://localhost:8080/
+  VITE_API_URL = http://localhost:5054/
 ```
 4. In the backend create a .env file inside backend/src/main/resources
 ```bash
   API_KEY = YOUR AMADEUS API KEY
   API_SECRET = YOUR AMADEUS API SECRET
-  FRONTEND_URL = http://localhost:5173
+  FRONTEND_URL = http://localhost:5053
 ```
 5. Run de project
 ```bash
