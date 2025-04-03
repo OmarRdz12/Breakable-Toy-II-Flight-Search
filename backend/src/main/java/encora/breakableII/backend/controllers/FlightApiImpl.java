@@ -2,6 +2,7 @@ package encora.breakableII.backend.controllers;
 
 import encora.breakableII.backend.models.Airport;
 import encora.breakableII.backend.models.FlightOffer;
+import encora.breakableII.backend.models.ResponseService;
 import encora.breakableII.backend.services.FlightService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-public class FlightApiImpl implements FlightApi{
+public class FlightApiImpl implements FlightApi {
     FlightService flightService;
 
     public FlightApiImpl(FlightService flightService) {
@@ -44,7 +45,23 @@ public class FlightApiImpl implements FlightApi{
         if (!arrivalDate.isEmpty() && LocalDate.parse(arrivalDate).isBefore(LocalDate.parse(departureDate))) {
             throw new ApiException("arrivalDare cannot be after departureDate", 400);
         }
-        return new ResponseEntity<>(flightService.searchFlights(originLocationCode, destinationCode, departureDate, adults, nonStop, currencyCode, arrivalDate), HttpStatus.OK);
+        ResponseService responseService = flightService.searchFlights(originLocationCode, destinationCode, departureDate, adults, nonStop, currencyCode, arrivalDate);
+        if (responseService.getStatus() == 404) {
+            return new ResponseEntity<>(responseService.getFlightOffers(), HttpStatus.NOT_FOUND);
+        }
+        if (responseService.getStatus() == 400) {
+            return new ResponseEntity<>(responseService.getFlightOffers(), HttpStatus.BAD_REQUEST);
+        }
+        if (responseService.getStatus() == 500) {
+            return new ResponseEntity<>(responseService.getFlightOffers(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (responseService.getStatus() == 501) {
+            return new ResponseEntity<>(responseService.getFlightOffers(), HttpStatus.NOT_IMPLEMENTED);
+        }
+        if (responseService.getStatus() == 502) {
+            return new ResponseEntity<>(responseService.getFlightOffers(), HttpStatus.BAD_GATEWAY);
+        }
+        return new ResponseEntity<>(responseService.getFlightOffers(), HttpStatus.OK);
     }
 
     @Override
