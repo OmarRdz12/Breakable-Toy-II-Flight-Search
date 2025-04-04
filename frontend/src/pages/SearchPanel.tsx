@@ -9,7 +9,7 @@ import InputDebounceSelect from "../components/inputs/InputDebounceSelect"
 import { BasicSelect, FlightRespose, SearchForm } from "../interfaces/types"
 import { GlobalContext } from "../context/GlobalContext"
 import InputText from "../components/inputs/InputText"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -27,15 +27,20 @@ const SearchPanel = () => {
 
     async function fetchAirportList(city: string): Promise<BasicSelect[]> {
         return fetch(`${url}locations?name=${city}`)
-            .then((response) => response.json())
-            .then((data) =>
-                data.map(
-                    (airport: { city: string; code: string; country: string }) => ({
-                        label: `${airport.city} (${airport.code})`,
-                        value: airport.code,
-                    }),
-                ),
-            );
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`${response.status}`)
+                }
+                return response.json()
+            })
+            .then((data: { city: string; code: string; country: string }[]) =>
+                data.map((airport) => ({
+                    label: `${airport.city} (${airport.code})`,
+                    value: airport.code,
+                }))).catch((error: Error) => {
+                    toast.error('Sorry, the server is not available')
+                    return []
+                })
     }
 
     const onSubmit = async (e: React.FormEvent) => {
@@ -51,6 +56,29 @@ const SearchPanel = () => {
             setFlights(flightResponses)
             navigate('/flights')
         } catch (error) {
+            const axiosError = error as AxiosError
+            if (axiosError.response) {
+                const status = axiosError.response.status
+                switch (status) {
+                    case 502:
+                        toast.error('Amadeus Internal Error')
+                        break
+                    case 500:
+                        toast.error('Internal Server Error')
+                        break
+                    case 400:
+                        toast.error('Bad request')
+                        break
+                    case 404:
+                        toast.error('Seach not found')
+                        break
+                    case 501:
+                        toast.error('Not implemented')
+                        break
+                    default:
+                        toast.error('Something went wrong')
+                }
+            }
             toast.warning('The server is busy, please wait')
         } finally {
             setLoading(false)

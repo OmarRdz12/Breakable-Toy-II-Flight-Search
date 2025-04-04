@@ -2,7 +2,7 @@ import { DatePicker } from 'antd'
 import { SizeType } from 'antd/es/config-provider/SizeContext'
 import dayjs, { Dayjs } from 'dayjs'
 
-interface InputDateProps {
+export interface InputDateProps {
     id: string
     label: string
     required?: boolean

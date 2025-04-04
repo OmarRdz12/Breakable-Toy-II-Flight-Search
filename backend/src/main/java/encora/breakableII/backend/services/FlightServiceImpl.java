@@ -12,6 +12,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -19,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-public class FlightServiceImpl implements FlightService{
+public class FlightServiceImpl implements FlightService {
 
     private final ApiAuth apiAuth;
     private final FlightSearchDao flightSearchDao;
@@ -30,29 +32,33 @@ public class FlightServiceImpl implements FlightService{
     @Value("${amadeus.api.airport}")
     private String urlBaseAirport;
 
-    public FlightServiceImpl(ApiAuth apiAuth, FlightSearchDao flightSearchDao ) {
+    public FlightServiceImpl(ApiAuth apiAuth, FlightSearchDao flightSearchDao) {
         this.apiAuth = apiAuth;
         this.flightSearchDao = flightSearchDao;
     }
 
     @Override
-    @RateLimiter(name="apiRateLimiter")
-    public List<FlightOffer> searchFlights(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate) {
+    @RateLimiter(name = "apiRateLimiter")
+    public ResponseService searchFlights(String originLocationCode, String destinationCode, String departureDate, int adults, boolean nonStop, String currencyCode, String arrivalDate) {
         RestTemplate restTemplate = new RestTemplate();
         String token = apiAuth.getAccessToken();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
-        String url = arrivalDate.isEmpty() ? urlBase  + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop + "&currencyCode=" + currencyCode : urlBase  + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop + "&currencyCode=" + currencyCode + "&returnDate=" + arrivalDate;
+        String url = arrivalDate.isEmpty() ? urlBase + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop + "&currencyCode=" + currencyCode : urlBase + "originLocationCode=" + originLocationCode + "&destinationLocationCode=" + destinationCode + "&departureDate=" + departureDate + "&adults=" + adults + "&nonStop=" + nonStop + "&currencyCode=" + currencyCode + "&returnDate=" + arrivalDate;
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        ObjectMapper mapper = new ObjectMapper();
-        List<FlightOffer> frontendResponse = new ArrayList<FlightOffer>();
-
+        ResponseService responseService = new ResponseService();
         try {
+            var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ObjectMapper mapper = new ObjectMapper();
+            List<FlightOffer> frontendResponse = new ArrayList<FlightOffer>();
             FlightResponse responseMap = mapper.readValue(response.getBody(), FlightResponse.class);
-            if (responseMap.getMeta().getCount() == 0)
-                return frontendResponse;
+            if (responseMap.getMeta().getCount() == 0) {
+                responseService.setFlightOffers(frontendResponse);
+                responseService.setStatus(404);
+                return responseService;
+            }
+
             List<FlightAmadeus> flightOffers = responseMap.getData();
             Dictionaries dictionary = responseMap.getDictionaries();
 
@@ -99,8 +105,7 @@ public class FlightServiceImpl implements FlightService{
 
                     individualFlight.setCarrierName(dictionary.getCarriers().get(segments.getFirst().getCarrierCode()));
                     List<Stops> stops = new ArrayList<Stops>();
-                    for (Segment segment : segments)
-                    {
+                    for (Segment segment : segments) {
                         Stops stop = new Stops();
                         stop.setAirlineCode(segment.getCarrierCode());
                         stop.setAirlineName(dictionary.getCarriers().get(segment.getCarrierCode()));
@@ -135,36 +140,54 @@ public class FlightServiceImpl implements FlightService{
                 frontendResponse.add(flightOffer);
 
             }
-            return frontendResponse;
+            responseService.setFlightOffers(frontendResponse);
+            responseService.setStatus(200);
+            return responseService;
         } catch (JsonProcessingException e) {
             e.printStackTrace();
+        } catch (HttpServerErrorException e) {
+            if (e.getStatusCode().value() == 500) {
+                System.err.println("Error 500 Amadeus, internal error");
+                responseService.setFlightOffers(new ArrayList<FlightOffer>());
+                responseService.setStatus(502);
+                return responseService;
+            }
+            responseService.setFlightOffers(new ArrayList<FlightOffer>());
+            responseService.setStatus(500);
+            return responseService;
+        } catch (HttpClientErrorException e) {
+            responseService.setFlightOffers(new ArrayList<FlightOffer>());
+            responseService.setStatus(400);
+            return responseService;
         }
-        return frontendResponse;
+        responseService.setFlightOffers(new ArrayList<FlightOffer>());
+        responseService.setStatus(501);
+        return responseService;
     }
 
 
     @Override
-    @RateLimiter(name="apiRateLimiter")
-    @Bulkhead(name="apiRateLimiter")
+    @RateLimiter(name = "apiRateLimiter")
+    @Bulkhead(name = "apiRateLimiter")
     public List<Airport> getLocations(String name) {
-        if(name.isEmpty()) {
+        if (name.isEmpty()) {
             List<Airport> emptyList = new ArrayList<Airport>();
             return emptyList;
         }
-       String token = apiAuth.getAccessToken();
+        String token = apiAuth.getAccessToken();
         RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
         String url = urlBaseAirport + "keyword=" + name;
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-        if(response.getStatusCodeValue() != 200) {
-            return flightSearchDao.getLocation(name);
-        }
-        ObjectMapper mapper = new ObjectMapper();
         try {
+            var response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            if (response.getStatusCode().value() != 200) {
+                return flightSearchDao.getLocation(name);
+            }
+            ObjectMapper mapper = new ObjectMapper();
             AirportResponse res = mapper.readValue(response.getBody(), AirportResponse.class);
-            if(res.getMeta().getCount() == 0)
+            if (res.getMeta().getCount() == 0)
                 return flightSearchDao.getLocation(name);
             List<AirportAmadeus> airportsAmadeus = res.getData();
             List<Airport> airports = new ArrayList<Airport>();
@@ -176,8 +199,22 @@ public class FlightServiceImpl implements FlightService{
             }
             return airports;
 
+        } catch (HttpServerErrorException e) {
+            if (e.getStatusCode().value() == 500) {
+                System.err.println("Error 500 on Amadeus: " + e.getMessage());
+                return flightSearchDao.getLocation(name);
+            }
+            return flightSearchDao.getLocation(name);
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode().value() == 423) {
+                System.err.println("Error 423 on Amadeus: " + e.getMessage());
+                return flightSearchDao.getLocation(name);
+            }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            System.err.println("Unexpected error");
+            return flightSearchDao.getLocation(name);
         }
         return flightSearchDao.getLocation(name);
     }
@@ -185,7 +222,7 @@ public class FlightServiceImpl implements FlightService{
     @Override
     public List<FlightOffer> sortFlights(String priceSort, String durationSort, List<FlightOffer> flightOffers) {
         List<FlightOffer> sortedFlights = new ArrayList<>(flightOffers);
-        if(priceSort.equals("") && durationSort.equals("")) {
+        if (priceSort.equals("") && durationSort.equals("")) {
             return flightOffers;
         } else {
             if (priceSort.equals("asc") && durationSort.equals("")) {
