@@ -2,15 +2,16 @@ import { useContext, useState } from "react"
 import InputSelect from "../components/inputs/InputSelect"
 import InputDate from "../components/inputs/InputDate"
 import { CheckboxProps, DatePickerProps } from "antd"
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import BaseButton from "../components/Button"
 import InputCheckbox from "../components/inputs/InputCheckbox"
 import InputDebounceSelect from "../components/inputs/InputDebounceSelect"
 import { BasicSelect, FlightRespose, SearchForm } from "../interfaces/types"
 import { GlobalContext } from "../context/GlobalContext"
 import InputText from "../components/inputs/InputText"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 const SearchPanel = () => {
     const url = import.meta.env.VITE_API_URL
@@ -22,27 +23,67 @@ const SearchPanel = () => {
     const { searchForm, setSearchForm, setFlights } = context
     const [departure, setDeparture] = useState<BasicSelect[]>([])
     const [arrival, setArrival] = useState<BasicSelect[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
     async function fetchAirportList(city: string): Promise<BasicSelect[]> {
         return fetch(`${url}locations?name=${city}`)
-            .then((response) => response.json())
-            .then((data) =>
-                data.map(
-                    (airport: { city: string; code: string; country: string }) => ({
-                        label: `${airport.city} (${airport.code})`,
-                        value: airport.code,
-                    }),
-                ),
-            );
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`${response.status}`)
+                }
+                return response.json()
+            })
+            .then((data: { city: string; code: string; country: string }[]) =>
+                data.map((airport) => ({
+                    label: `${airport.city} (${airport.code})`,
+                    value: airport.code,
+                }))).catch((error: Error) => {
+                    toast.error('Sorry, the server is not available')
+                    return []
+                })
     }
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const data = await axios.get(`${url}flights?originLocationCode=${searchForm.originLocationCode}&destinationLocationCode=${searchForm.destinationCode}&departureDate=${searchForm.departureDate}${searchForm.arrivalDate === "" ? "" : `&arrivalDate=${searchForm.arrivalDate}`}&adults=${searchForm.adults}&currencyCode=${searchForm.currency}&nonStop=${searchForm.nonStop}`)
-        const flightResponses: FlightRespose[] = data.data
-        console.log(data.data)
-        setFlights(flightResponses)
-        navigate('/flights')
+        if (!searchForm.adults || !searchForm.originLocationCode || !searchForm.destinationCode || !searchForm.departureDate || !searchForm.currency) {
+            toast.error("Fill in all required fields")
+            return
+        }
+        try {
+            setLoading(true)
+            const data = await axios.get(`${url}flights?originLocationCode=${searchForm.originLocationCode}&destinationLocationCode=${searchForm.destinationCode}&departureDate=${searchForm.departureDate}${searchForm.arrivalDate === "" ? "" : `&arrivalDate=${searchForm.arrivalDate}`}&adults=${searchForm.adults}&currencyCode=${searchForm.currency}&nonStop=${searchForm.nonStop}`)
+            const flightResponses: FlightRespose[] = data.data
+            setFlights(flightResponses)
+            navigate('/flights')
+        } catch (error) {
+            const axiosError = error as AxiosError
+            if (axiosError.response) {
+                const status = axiosError.response.status
+                switch (status) {
+                    case 502:
+                        toast.error('Amadeus Internal Error')
+                        break
+                    case 500:
+                        toast.error('Internal Server Error')
+                        break
+                    case 400:
+                        toast.error('Bad request')
+                        break
+                    case 404:
+                        toast.error('Seach not found')
+                        break
+                    case 501:
+                        toast.error('Not implemented')
+                        break
+                    default:
+                        toast.error('Something went wrong')
+                }
+            }
+            toast.warning('The server is busy, please wait')
+        } finally {
+            setLoading(false)
+        }
+
     }
 
     const onChangeDeparture: DatePickerProps['onChange'] = (date) => {
@@ -50,7 +91,7 @@ const SearchPanel = () => {
     }
 
     const onChangeArrival: DatePickerProps['onChange'] = (date) => {
-        setSearchForm((prev: SearchForm) => ({ ...prev, ["arrivalDate"]: date ?  date.format("YYYY-MM-DD") : "" }))
+        setSearchForm((prev: SearchForm) => ({ ...prev, ["arrivalDate"]: date ? date.format("YYYY-MM-DD") : "" }))
     }
 
     const onChangeBox: CheckboxProps['onChange'] = (e) => {
@@ -76,6 +117,7 @@ const SearchPanel = () => {
                     value={departure}
                     setValue={setDeparture}
                     setValueForm={onChangeForm}
+                    required
                 />
                 <InputDebounceSelect
                     label="Arrival airport"
@@ -84,6 +126,7 @@ const SearchPanel = () => {
                     value={arrival}
                     setValue={setArrival}
                     setValueForm={onChangeForm}
+                    required
                 />
                 <InputDate
                     name="dep-date"
@@ -94,6 +137,7 @@ const SearchPanel = () => {
                     maxDate={searchForm.arrivalDate === "" ? undefined : searchForm.arrivalDate}
                     size="large"
                     className="w-1/2"
+                    required
                 />
                 <InputDate
                     name="ret-date"
@@ -118,6 +162,7 @@ const SearchPanel = () => {
                     value={searchForm.currency}
                     className="w-1/2"
                     size="large"
+                    required
                 />
                 <InputText
                     name="adults"
@@ -140,6 +185,7 @@ const SearchPanel = () => {
                         size="large"
                         className="w-1/2 !bg-zinc-700 !text-white shadow hover:!bg-zinc-500 
                         hover:!border-zinc-500 hover:!text-white"
+                        loading={loading}
                     />
                 </div>
             </form>

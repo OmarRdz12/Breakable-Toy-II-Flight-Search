@@ -14,6 +14,11 @@ export interface SearchForm {
     nonStop: boolean
 }
 
+export interface SortingForm {
+    priceSort: string,
+    durationSort: string
+}
+
 export interface TextInputProps {
     name: string
     placeholder?: string
@@ -62,8 +67,7 @@ export interface Stops {
     fareDetailsBySegment: FareDetailsBySegment
 }
 
-export interface FlightRespose {
-    id: string
+export interface IndividualFlight {
     airlineCode: string
     airlineName: string
     arrivalAirport: string
@@ -75,8 +79,14 @@ export interface FlightRespose {
     departureAirportName: string
     departureDate: string
     duration: string
+    currency: string
+    stops: Stops[]
+}
+
+export interface FlightRespose {
+    id: string
     pricePerTraveler: string
     priceTotal: string
-    stops: Stops[]
-    currency: string
+    totalDuration: string
+    individualFlights: IndividualFlight[]
 }

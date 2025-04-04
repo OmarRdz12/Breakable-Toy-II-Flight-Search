@@ -4,6 +4,8 @@ import encora.breakableII.backend.models.Airport;
 import encora.breakableII.backend.models.FlightOffer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -21,5 +23,10 @@ public interface FlightApi {
                                                  @RequestParam(name = "arrivalDate", required = false, defaultValue = "") String arrivalDate
 
     );
+    @PostMapping("/flights/sort")
+    ResponseEntity<List<FlightOffer>> sortFlights(@RequestParam(name = "priceSort", required = true, defaultValue = "") String priceSort,
+                                                 @RequestParam(name = "durationSort", required = true) String durationSort,
+                                                  @RequestBody(required = true) List<FlightOffer> flightOffers
+                                                  );
 
 }

@@ -2,7 +2,7 @@ import { DatePicker } from 'antd'
 import { SizeType } from 'antd/es/config-provider/SizeContext'
 import dayjs, { Dayjs } from 'dayjs'
 
-interface InputDateProps {
+export interface InputDateProps {
     id: string
     label: string
     required?: boolean
@@ -29,7 +29,7 @@ const InputDate = ({
 }: InputDateProps) => {
     return (
         <div className="flex gap-4 mt-4 items-start justify-start w-full">
-            <label htmlFor={id} className='w-1/4'> {label}</label>
+            <label htmlFor={id} className='w-1/4'>{label} {required && <span className='text-red-500'>*</span>}</label>
             <DatePicker
                 title={name}
                 id={id}

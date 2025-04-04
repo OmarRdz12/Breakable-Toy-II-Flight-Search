@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { FlightRespose } from "../interfaces/types"
+import { FlightRespose, IndividualFlight } from "../../interfaces/types"
 
 const FlightCard = ({
     departureDate,
@@ -15,7 +15,7 @@ const FlightCard = ({
     airlineName,
     currency,
     id
-}: FlightRespose) => {
+}: Omit<FlightRespose, "individualFlights"> & IndividualFlight) => {
     const navigate = useNavigate()
     const departureDateFormat = departureDate.split("T")
     const arrivalDateFormat = arrivalDateTime.split("T")
@@ -25,7 +25,7 @@ const FlightCard = ({
     }
 
     return (
-        <div className="w-11/12 h-52 flex flex-col my-4 hover:cursor-pointer" onClick={onClick}>
+        <div className="w-11/12 h-fit flex flex-col hover:cursor-pointer" onClick={onClick}>
             <div className="grid grid-cols-3 w-full border shadow rounded p-4 items-cente justify-center">
                 <p>{`${departureDateFormat[0]} (${departureDateFormat[1]})`} - {`${arrivalDateFormat[0]} (${arrivalDateFormat[1]})`}</p>
                 <p className="text-center text-sm">{duration.replace("PT", "").replace("H", " hrs ").replace("M", " min")}</p>

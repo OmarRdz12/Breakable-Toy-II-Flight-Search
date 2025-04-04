@@ -1,10 +1,14 @@
 package encora.breakableII.backend.dao;
 
 import encora.breakableII.backend.models.Airport;
+import encora.breakableII.backend.models.FlightOffer;
 import org.springframework.stereotype.Repository;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class FlightSearchDaoImpl implements  FlightSearchDao {
@@ -487,7 +491,7 @@ public class FlightSearchDaoImpl implements  FlightSearchDao {
     @Override
     public List<Airport> getLocation(String name) {
         List<Airport> filterAirports = airports;
-        filterAirports = new ArrayList<Airport>(filterAirports.stream().filter(airport -> airport.getCity().toLowerCase().contains(name) || airport.getCode().toLowerCase().contains(name) || airport.getCountry().toLowerCase().contains(name)).toList());
+        filterAirports = new ArrayList<Airport>(filterAirports.stream().filter(airport -> airport.getCity().toLowerCase().contains(name.toLowerCase()) || airport.getCode().toLowerCase().contains(name.toLowerCase()) || airport.getCountry().toLowerCase().contains(name.toLowerCase())).toList());
         return filterAirports;
     }
 }

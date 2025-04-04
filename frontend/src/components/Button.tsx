@@ -14,6 +14,7 @@ interface ButtonProps {
     icon?: ReactNode
     disabled?: boolean
     id?: string
+    loading?: boolean
 }
 
 const BaseButton = ({
@@ -26,7 +27,8 @@ const BaseButton = ({
     shape,
     icon,
     disabled,
-    id
+    id,
+    loading
 }: ButtonProps) => {
     return (
         <>
@@ -40,6 +42,7 @@ const BaseButton = ({
                             className={className}
                             disabled={disabled}
                             id={id}
+                            loading={loading}
                         />
                     </Tooltip>
                     :
@@ -51,6 +54,7 @@ const BaseButton = ({
                         disabled={disabled}
                         id={id}
                         icon={icon}
+                        loading={loading}
                     >
                         {text}
                     </Button >
